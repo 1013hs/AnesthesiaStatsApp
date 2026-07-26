@@ -9,7 +9,7 @@
         body {
             font-family: -apple-system, sans-serif;
             min-height: 100vh;
-            background-color: #f2f2f7;
+            background-color: #121212;
             color: #1c1c1e;
             padding: 16px;
             padding-top: 60px;
@@ -30,9 +30,11 @@
             background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px);
             border-radius: 12px; padding: 16px; margin-bottom: 16px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.2s ease;
         }
-        h2 { font-size: 1rem; margin-bottom: 10px; color: #000; }
-        label { display: block; font-size: 0.85rem; font-weight: bold; margin: 8px 0 4px; }
+        h2 { font-size: 1rem; margin-bottom: 10px; color: #000; text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
+        label { display: block; font-size: 0.85rem; font-weight: bold; margin: 8px 0 4px; text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
         select, input {
             width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;
             background: #fff; font-size: 0.95rem; margin-bottom: 6px;
@@ -63,7 +65,7 @@
 
     <div class="navbar">
         <b>💉 麻醉统计系统</b>
-        <button id="btn-open-set" style="background:none; border:none; color:#007aff; font-weight:bold;">⚙️ 外观设置</button>
+        <button id="btn-open-set" style="background:none; border:none; color:#007aff; font-weight:bold; cursor:pointer;">⚙️ 外观设置</button>
     </div>
 
     <div class="container">
@@ -100,7 +102,7 @@
                 <div style="flex:1;"><label>结束日期</label><input type="date" id="end-date"></div>
             </div>
 
-            <div style="background:rgba(0,0,0,0.03); padding:10px; border-radius:8px; margin:10px 0;">
+            <div style="background:rgba(255,255,255,0.5); padding:10px; border-radius:8px; margin:10px 0;">
                 <label style="color:#007aff; margin-top:0;">🔍 自定义组合多选（同时出现）</label>
                 
                 <div style="font-size:0.75rem; font-weight:bold;">麻醉分级：</div>
@@ -148,7 +150,7 @@
 
             <button class="btn btn-purple" id="btn-filter">📊 按条件组合统计与计数</button>
 
-            <div id="stat-box" style="display:none; margin-top:10px; text-align:center; padding:10px; background:#fff; border-radius:8px;">
+            <div id="stat-box" style="display:none; margin-top:10px; text-align:center; padding:10px; background:rgba(255,255,255,0.9); border-radius:8px;">
                 <div style="font-size:1.2rem; font-weight:bold; color:#007aff;" id="stat-count">0 次</div>
                 <div style="font-size:0.8rem; color:#666;" id="stat-title">符合条件记录数</div>
             </div>
@@ -160,15 +162,15 @@
 
     <!-- 设置弹窗 -->
     <div class="modal" id="modal-set">
-        <div class="card" style="width:100%; max-width:400px; background:#fff;">
+        <div class="card" style="width:100%; max-width:400px; background:#fff; margin-bottom:0;">
             <h2>🎨 外观与透明度设置</h2>
-            <label>上传背景照片：</label>
+            <label style="color:#1c1c1e;">上传背景照片：</label>
             <input type="file" id="file-wall" accept="image/*">
 
-            <label>1. 背景壁纸透明度：</label>
+            <label style="color:#1c1c1e;">1. 背景壁纸清晰度：</label>
             <input type="range" id="range-wall" min="0" max="100" value="80">
 
-            <label>2. 窗口卡片透明度（0%为全透明）：</label>
+            <label style="color:#1c1c1e;">2. 窗口卡片透明度（0%为全透明）：</label>
             <input type="range" id="range-card" min="0" max="100" value="20">
 
             <button class="btn" id="btn-close-set">保存并关闭</button>
@@ -176,7 +178,6 @@
     </div>
 
     <script>
-        // 获取数据
         function loadData() {
             try { return JSON.parse(localStorage.getItem('mz_data') || '[]'); } catch(e) { return []; }
         }
@@ -184,20 +185,19 @@
             localStorage.setItem('mz_data', JSON.stringify(arr));
         }
 
-        // 渲染列表
         function render(data) {
             const list = data || loadData();
             const box = document.getElementById('list-box');
             if (list.length === 0) {
-                box.innerHTML = '<p style="text-align:center; color:#888; padding:10px;">暂无数据记录</p>';
+                box.innerHTML = '<p style="text-align:center; color:#333; font-weight:bold; padding:10px; text-shadow:0 1px 2px rgba(255,255,255,0.8);">暂无数据记录</p>';
                 return;
             }
             box.innerHTML = list.map(item => `
                 <div class="record-item">
                     <div>
                         <b>${item.deptName}</b> | ${item.mzMethod}<br>
-                        <span style="color:#666; font-size:0.75rem;">麻醉:${item.mzLevel} | ASA:${item.asaLevel} | 手术:${item.opLevel}</span><br>
-                        <span style="color:#999; font-size:0.7rem;">${item.time}</span>
+                        <span style="color:#444; font-size:0.75rem;">麻醉:${item.mzLevel} | ASA:${item.asaLevel} | 手术:${item.opLevel}</span><br>
+                        <span style="color:#666; font-size:0.7rem;">${item.time}</span>
                     </div>
                     <button class="btn btn-danger" onclick="del(${item.id})">删除</button>
                 </div>
@@ -210,16 +210,46 @@
             render();
         }
 
+        // 关键改动：支持 0% 纯透明
         function setCardOpacity(val) {
             const alpha = val / 100;
+            const blurPx = Math.round((val / 100) * 10);
             document.querySelectorAll('.app-card').forEach(c => {
                 c.style.background = `rgba(255, 255, 255, ${alpha})`;
+                c.style.backdropFilter = `blur(${blurPx}px)`;
+                c.style.webkitBackdropFilter = `blur(${blurPx}px)`;
+                if (val == 0) {
+                    c.style.border = 'none';
+                    c.style.boxShadow = 'none';
+                } else {
+                    c.style.border = '1px solid rgba(255, 255, 255, 0.4)';
+                    c.style.boxShadow = '0 2px 10px rgba(0,0,0,0.05)';
+                }
             });
         }
 
-        // 绑定所有事件
         window.onload = function() {
             render();
+
+            // 读取保存的透明度偏好
+            const savedCardAlpha = localStorage.getItem('mz_card_alpha');
+            if (savedCardAlpha !== null) {
+                document.getElementById('range-card').value = savedCardAlpha;
+                setCardOpacity(savedCardAlpha);
+            } else {
+                setCardOpacity(20);
+            }
+
+            const savedWallAlpha = localStorage.getItem('mz_wall_alpha');
+            if (savedWallAlpha !== null) {
+                document.getElementById('range-wall').value = savedWallAlpha;
+                document.getElementById('bg-overlay').style.opacity = savedWallAlpha / 100;
+            }
+
+            const savedBgImg = localStorage.getItem('mz_wall_img');
+            if (savedBgImg) {
+                document.getElementById('bg-overlay').style.backgroundImage = 'url(' + savedBgImg + ')';
+            }
 
             // 保存按钮
             document.getElementById('btn-save').onclick = function() {
@@ -277,19 +307,25 @@
                 document.getElementById('modal-set').classList.remove('active');
             };
 
-            // 外观与透明度
+            // 外观滑块事件
             document.getElementById('range-card').oninput = function(e) {
-                setCardOpacity(e.target.value);
+                const v = e.target.value;
+                setCardOpacity(v);
+                localStorage.setItem('mz_card_alpha', v);
             };
             document.getElementById('range-wall').oninput = function(e) {
-                document.getElementById('bg-overlay').style.opacity = e.target.value / 100;
+                const v = e.target.value;
+                document.getElementById('bg-overlay').style.opacity = v / 100;
+                localStorage.setItem('mz_wall_alpha', v);
             };
             document.getElementById('file-wall').onchange = function(e) {
                 const f = e.target.files[0];
                 if (f) {
                     const r = new FileReader();
                     r.onload = function(evt) {
-                        document.getElementById('bg-overlay').style.backgroundImage = 'url(' + evt.target.result + ')';
+                        const base64 = evt.target.result;
+                        document.getElementById('bg-overlay').style.backgroundImage = 'url(' + base64 + ')';
+                        try { localStorage.setItem('mz_wall_img', base64); } catch(err) { alert('图片较大，请尝试小一点的图片'); }
                     };
                     r.readAsDataURL(f);
                 }
