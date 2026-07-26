@@ -72,6 +72,18 @@
         .btn-secondary { background-color: #5856d6; box-shadow: 0 4px 10px rgba(88,86,214,0.3); }
         .btn-danger { background-color: #ff3b30; padding: 6px 12px; font-size: 0.8rem; width: auto; box-shadow: none; }
 
+        /* 多选标签组样式 */
+        .checkbox-group {
+            display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;
+        }
+        .checkbox-tag {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: rgba(255, 255, 255, 0.9); padding: 6px 10px; border-radius: 8px;
+            font-size: 0.8rem; font-weight: 600; border: 1px solid rgba(0,0,0,0.15); cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .checkbox-tag input { width: auto; margin: 0; cursor: pointer; }
+
         /* 统计结果 */
         .stat-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 10px;
@@ -168,7 +180,7 @@
             </form>
         </div>
 
-        <!-- 历史记录与时间段统计卡片 -->
+        <!-- 历史记录与高级组合统计卡片 -->
         <div class="card app-card">
             <h2>📅 历史记录与统计</h2>
             
@@ -182,16 +194,63 @@
                     <input type="date" id="end-date">
                 </div>
             </div>
-            
-            <button class="btn btn-secondary" id="filter-btn" style="margin-top:0;">📊 按时间段开始统计</button>
 
-            <!-- 各类别详细统计结果 -->
+            <!-- 新增：多项目组合勾选区 -->
+            <div style="background: rgba(255,255,255,0.6); padding: 10px; border-radius: 10px; margin-bottom: 10px; border: 1px solid rgba(0,0,0,0.1);">
+                <label style="color:#007aff; margin-bottom: 6px;">🔍 自定义组合多选（勾选任意1个或多个同时出现）</label>
+                
+                <div style="font-size:0.75rem; font-weight:700; margin-top:4px;">麻醉分级：</div>
+                <div class="checkbox-group" data-group="mzLevel">
+                    <label class="checkbox-tag"><input type="checkbox" value="Ⅰ级">Ⅰ级</label>
+                    <label class="checkbox-tag"><input type="checkbox" value="Ⅱ级">Ⅱ级</label>
+                    <label class="checkbox-tag"><input type="checkbox" value="Ⅲ级">Ⅲ级</label>
+                </div>
+
+                <div style="font-size:0.75rem; font-weight:700; margin-top:4px;">科室名称：</div>
+                <div class="checkbox-group" data-group="deptName">
+                    <label class="checkbox-tag"><input type="checkbox" value="外一科">外一科</label>
+                    <label class="checkbox-tag"><input type="checkbox" value="外二科">外二科</label>
+                    <label class="checkbox-tag"><input type="checkbox" value="外三科">外三科</label>
+                </div>
+
+                <div style="font-size:0.75rem; font-weight:700; margin-top:4px;">麻醉方式：</div>
+                <div class="checkbox-group" data-group="mzMethod">
+                    <label class="checkbox-tag"><input type="checkbox" value="全麻">全麻</label>
+                    <label class="checkbox-tag"><input type="checkbox" value="支气管内麻醉">支气管内麻醉</label>
+                    <label class="checkbox-tag"><input type="checkbox" value="无插管全麻">无插管全麻</label>
+                    <label class="checkbox-tag"><input type="checkbox" value="腰硬联合">腰硬联合</label>
+                    <label class="checkbox-tag"><input type="checkbox" value="腰麻">腰麻</label>
+                    <label class="checkbox-tag"><input type="checkbox" value="神经阻滞">神经阻滞</label>
+                    <label class="checkbox-tag"><input type="checkbox" value="局麻">局麻</label>
+                </div>
+
+                <div style="font-size:0.75rem; font-weight:700; margin-top:4px;">ASA分级：</div>
+                <div class="checkbox-group" data-group="asaLevel">
+                    <label class="checkbox-tag"><input type="checkbox" value="Ⅰ级">Ⅰ级</label>
+                    <label class="checkbox-tag"><input type="checkbox" value="Ⅱ级">Ⅱ级</label>
+                    <label class="checkbox-tag"><input type="checkbox" value="Ⅲ级">Ⅲ级</label>
+                    <label class="checkbox-tag"><input type="checkbox" value="Ⅳ级">Ⅳ级</label>
+                    <label class="checkbox-tag"><input type="checkbox" value="Ⅴ级">Ⅴ级</label>
+                </div>
+
+                <div style="font-size:0.75rem; font-weight:700; margin-top:4px;">手术分级：</div>
+                <div class="checkbox-group" data-group="opLevel">
+                    <label class="checkbox-tag"><input type="checkbox" value="一级">一级</label>
+                    <label class="checkbox-tag"><input type="checkbox" value="二级">二级</label>
+                    <label class="checkbox-tag"><input type="checkbox" value="三级">三级</label>
+                    <label class="checkbox-tag"><input type="checkbox" value="四级">四级</label>
+                </div>
+            </div>
+            
+            <button class="btn btn-secondary" id="filter-btn" style="margin-top:0;">📊 按条件组合统计与计数</button>
+
+            <!-- 统计结果 -->
             <div id="stat-result" style="margin-top: 15px; display: none;">
-                <h3 style="font-size: 0.95rem; margin-bottom: 8px; color: #007aff; text-shadow:0 1px 2px rgba(255,255,255,0.8);">【各分类独立计数汇总】</h3>
+                <h3 style="font-size: 0.95rem; margin-bottom: 8px; color: #007aff; text-shadow:0 1px 2px rgba(255,255,255,0.8);" id="stat-title-text">【统计结果汇总】</h3>
                 <div class="stat-grid" id="stat-grid-content"></div>
             </div>
 
-            <!-- 明细明细记录列表 -->
+            <!-- 明细记录列表 -->
             <h3 style="font-size: 0.95rem; margin-top: 15px; margin-bottom: 8px; text-shadow:0 1px 2px rgba(255,255,255,0.8);">【历史明细列表】</h3>
             <div id="records-list"></div>
         </div>
@@ -237,6 +296,7 @@
         const filterBtn = document.getElementById('filter-btn');
         const statResult = document.getElementById('stat-result');
         const statGridContent = document.getElementById('stat-grid-content');
+        const statTitleText = document.getElementById('stat-title-text');
 
         const bgOverlay = document.getElementById('bg-overlay');
         const uploadInput = document.getElementById('wallpaper-upload');
@@ -301,38 +361,61 @@
             renderData();
         };
 
+        // 点击组合统计按钮
         filterBtn.addEventListener('click', () => {
             const start = document.getElementById('start-date').value;
             const end = document.getElementById('end-date').value;
             let list = getRecords();
 
+            // 1. 按日期范围筛选
             if (start) list = list.filter(item => item.date >= start);
             if (end) list = list.filter(item => item.date <= end);
 
-            renderData(list);
-
-            const counts = {};
-            list.forEach(item => {
-                ['mzLevel', 'deptName', 'mzMethod', 'asaLevel', 'opLevel'].forEach(key => {
-                    const val = item[key];
-                    counts[val] = (counts[val] || 0) + 1;
-                });
+            // 2. 收集所有勾选的组合条件
+            const selectedConditions = {};
+            document.querySelectorAll('.checkbox-group').forEach(group => {
+                const groupKey = group.getAttribute('data-group');
+                const checkedValues = Array.from(group.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+                if (checkedValues.length > 0) {
+                    selectedConditions[groupKey] = checkedValues;
+                }
             });
 
-            statGridContent.innerHTML = Object.keys(counts).map(key => `
-                <div class="stat-card">
-                    <div class="num">${counts[key]} 次</div>
-                    <div class="title">${key}</div>
-                </div>
-            `).join('');
+            // 3. 执行多条件同时满足（AND）的交集过滤
+            const activeKeys = Object.keys(selectedConditions);
+            if (activeKeys.length > 0) {
+                list = list.filter(item => {
+                    return activeKeys.every(key => {
+                        return selectedConditions[key].includes(item[key]);
+                    });
+                });
+            }
 
+            // 4. 渲染筛选后的明细
+            renderData(list);
+
+            // 5. 展示统计结果
+            let summaryText = '【组合条件筛选结果】';
+            if (activeKeys.length > 0) {
+                const descList = [];
+                activeKeys.forEach(k => descList.push(selectedConditions[k].join(',')));
+                summaryText = `【组合统计：${descList.join(' 且 ')}】`;
+            }
+            statTitleText.textContent = summaryText;
+
+            statGridContent.innerHTML = `
+                <div class="stat-card" style="grid-column: 1 / -1;">
+                    <div class="num">${list.length} 次</div>
+                    <div class="title">满足所选条件的总次数</div>
+                </div>
+            `;
             statResult.style.display = 'block';
         });
 
         // 动态计算卡片背景色与毛玻璃 blur 程度
         function setCardOpacity(val) {
             const alpha = val / 100;
-            const blurPx = Math.round((val / 100) * 12); // 从 0px 到 12px
+            const blurPx = Math.round((val / 100) * 12);
 
             appCards.forEach(card => {
                 card.style.background = `rgba(255, 255, 255, ${alpha})`;
@@ -349,59 +432,4 @@
         }
 
         document.getElementById('open-settings-btn').onclick = () => settingsModal.classList.add('active');
-        document.getElementById('close-settings-btn').onclick = () => settingsModal.classList.remove('active');
-
-        window.addEventListener('DOMContentLoaded', () => {
-            renderData();
-            
-            const savedBg = localStorage.getItem('app_wallpaper');
-            const savedOpacity = localStorage.getItem('app_wallpaper_opacity') || '80';
-            const savedCardOpacity = localStorage.getItem('app_card_opacity') || '20';
-
-            if (savedBg) { bgOverlay.style.backgroundImage = `url(${savedBg})`; resetBtn.style.display = 'inline-block'; }
-            
-            opacityRange.value = savedOpacity;
-            opacityValue.textContent = savedOpacity + '%';
-            bgOverlay.style.opacity = savedOpacity / 100;
-
-            cardOpacityRange.value = savedCardOpacity;
-            cardOpacityValue.textContent = savedCardOpacity + '%';
-            setCardOpacity(savedCardOpacity);
-        });
-
-        uploadInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (evt) {
-                    const base64Img = evt.target.result;
-                    bgOverlay.style.backgroundImage = `url(${base64Img})`;
-                    resetBtn.style.display = 'inline-block';
-                    try { localStorage.setItem('app_wallpaper', base64Img); } catch (e) { alert('请上传小于2MB的图片'); }
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        resetBtn.onclick = () => {
-            bgOverlay.style.backgroundImage = 'none';
-            localStorage.removeItem('app_wallpaper');
-            resetBtn.style.display = 'none';
-        };
-
-        opacityRange.oninput = (e) => {
-            const val = e.target.value;
-            opacityValue.textContent = val + '%';
-            bgOverlay.style.opacity = val / 100;
-            localStorage.setItem('app_wallpaper_opacity', val);
-        };
-
-        cardOpacityRange.oninput = (e) => {
-            const val = e.target.value;
-            cardOpacityValue.textContent = val + '%';
-            setCardOpacity(val);
-            localStorage.setItem('app_card_opacity', val);
-        };
-    </script>
-</body>
-</html>
+        document.getElementById('close-settings-btn').onclick = () => settingsModal.classList.remove('active'
