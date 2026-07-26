@@ -38,13 +38,12 @@
             padding: 16px; padding-top: 62px;
         }
 
-        /* 窗口卡片：支持完全透明 */
+        /* 窗口卡片 */
         .card {
             border-radius: 16px; padding: 18px; margin-bottom: 16px;
             transition: all 0.2s ease;
         }
 
-        /* 增强文字可读性，即使全透明也能清晰识别 */
         h2 { 
             font-size: 1.1rem; margin-bottom: 12px; color: #1d1d1f; 
             display: flex; justify-content: space-between; align-items: center;
@@ -57,7 +56,6 @@
             text-shadow: 0 1px 2px rgba(255,255,255,0.8);
         }
 
-        /* 输入框与按钮保持高清晰度（不透明） */
         select, input {
             width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(0, 0, 0, 0.2);
             background: rgba(255, 255, 255, 0.95); font-size: 0.95rem; outline: none;
@@ -70,9 +68,9 @@
             box-shadow: 0 4px 10px rgba(0,122,255,0.3);
         }
         .btn-secondary { background-color: #5856d6; box-shadow: 0 4px 10px rgba(88,86,214,0.3); }
-        .btn-danger { background-color: #ff3b30; padding: 6px 12px; font-size: 0.8rem; width: auto; box-shadow: none; }
+        .btn-danger { background-color: #ff3b30; padding: 6px 12px; font-size: 0.8rem; width: auto; box-shadow: none; color: white; border: none; border-radius: 6px; }
 
-        /* 多选标签组样式 */
+        /* 多选标签组 */
         .checkbox-group {
             display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;
         }
@@ -84,7 +82,6 @@
         }
         .checkbox-tag input { width: auto; margin: 0; cursor: pointer; }
 
-        /* 统计结果 */
         .stat-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 10px;
         }
@@ -176,7 +173,7 @@
                     </select>
                 </div>
 
-                <button type="submit" class="btn">保存此条记录</button>
+                <button type="submit" class="btn" id="save-btn">保存此条记录</button>
             </form>
         </div>
 
@@ -195,7 +192,7 @@
                 </div>
             </div>
 
-            <!-- 新增：多项目组合勾选区 -->
+            <!-- 多项目组合勾选区 -->
             <div style="background: rgba(255,255,255,0.6); padding: 10px; border-radius: 10px; margin-bottom: 10px; border: 1px solid rgba(0,0,0,0.1);">
                 <label style="color:#007aff; margin-bottom: 6px;">🔍 自定义组合多选（勾选任意1个或多个同时出现）</label>
                 
@@ -258,7 +255,7 @@
 
     <!-- 外观与壁纸设置弹窗 -->
     <div class="modal-mask" id="settings-modal">
-        <div class="modal-content card" style="background: rgba(255,255,255,0.95); box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+        <div class="modal-content card" style="background: rgba(255,255,255,0.95); box-shadow: 0 10px 30px rgba(0,0,0,0.3); width:100%; max-width:500px;">
             <h2>🎨 外观与透明度设置</h2>
             
             <div class="form-group">
@@ -291,56 +288,26 @@
     </div>
 
     <script>
-        const form = document.getElementById('data-form');
-        const recordsList = document.getElementById('records-list');
-        const filterBtn = document.getElementById('filter-btn');
-        const statResult = document.getElementById('stat-result');
-        const statGridContent = document.getElementById('stat-grid-content');
-        const statTitleText = document.getElementById('stat-title-text');
+        // 本地数据读写
+        function getRecords() { 
+            try { return JSON.parse(localStorage.getItem('mz_data_records') || '[]'); } 
+            catch(e) { return []; }
+        }
+        function saveRecords(data) { 
+            localStorage.setItem('mz_data_records', JSON.stringify(data)); 
+        }
 
-        const bgOverlay = document.getElementById('bg-overlay');
-        const uploadInput = document.getElementById('wallpaper-upload');
-        const resetBtn = document.getElementById('reset-bg');
-        const opacityRange = document.getElementById('opacity-range');
-        const opacityValue = document.getElementById('opacity-value');
-        
-        const cardOpacityRange = document.getElementById('card-opacity-range');
-        const cardOpacityValue = document.getElementById('card-opacity-value');
-        const appCards = document.querySelectorAll('.app-card');
-        
-        const settingsModal = document.getElementById('settings-modal');
-
-        function getRecords() { return JSON.parse(localStorage.getItem('mz_data_records') || '[]'); }
-        function saveRecords(data) { localStorage.setItem('mz_data_records', JSON.stringify(data)); }
-
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const record = {
-                id: Date.now(),
-                date: new Date().toISOString().split('T')[0],
-                time: new Date().toLocaleString(),
-                mzLevel: document.getElementById('mz-level').value,
-                deptName: document.getElementById('dept-name').value,
-                mzMethod: document.getElementById('mz-method').value,
-                asaLevel: document.getElementById('asa-level').value,
-                opLevel: document.getElementById('op-level').value
-            };
-
-            const list = getRecords();
-            list.unshift(record);
-            saveRecords(list);
-            alert('保存成功！');
-            renderData();
-        });
-
+        // 渲染列表
         function renderData(filteredList = null) {
             const list = filteredList || getRecords();
-            if (list.length === 0) {
-                recordsList.innerHTML = '<p style="text-align:center; color:#222; font-weight:600; padding:15px; text-shadow:0 1px 2px rgba(255,255,255,0.8);">暂无数据记录</p>';
+            const container = document.getElementById('records-list');
+            
+            if (!list || list.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#222; font-weight:600; padding:15px; text-shadow:0 1px 2px rgba(255,255,255,0.8);">暂无数据记录</p>';
                 return;
             }
 
-            recordsList.innerHTML = list.map((item) => `
+            container.innerHTML = list.map((item) => `
                 <div class="record-item">
                     <div>
                         <div><b>${item.deptName}</b> | 麻醉:${item.mzMethod}</div>
@@ -349,11 +316,12 @@
                         </div>
                         <div style="color:#666; font-size:0.7rem;">${item.time}</div>
                     </div>
-                    <button class="btn btn-danger" onclick="deleteItem(${item.id})">删除</button>
+                    <button class="btn-danger" onclick="deleteItem(${item.id})">删除</button>
                 </div>
             `).join('');
         }
 
+        // 删除单条记录
         window.deleteItem = function(id) {
             let list = getRecords();
             list = list.filter(item => item.id !== id);
@@ -361,61 +329,11 @@
             renderData();
         };
 
-        // 点击组合统计按钮
-        filterBtn.addEventListener('click', () => {
-            const start = document.getElementById('start-date').value;
-            const end = document.getElementById('end-date').value;
-            let list = getRecords();
-
-            // 1. 按日期范围筛选
-            if (start) list = list.filter(item => item.date >= start);
-            if (end) list = list.filter(item => item.date <= end);
-
-            // 2. 收集所有勾选的组合条件
-            const selectedConditions = {};
-            document.querySelectorAll('.checkbox-group').forEach(group => {
-                const groupKey = group.getAttribute('data-group');
-                const checkedValues = Array.from(group.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
-                if (checkedValues.length > 0) {
-                    selectedConditions[groupKey] = checkedValues;
-                }
-            });
-
-            // 3. 执行多条件同时满足（AND）的交集过滤
-            const activeKeys = Object.keys(selectedConditions);
-            if (activeKeys.length > 0) {
-                list = list.filter(item => {
-                    return activeKeys.every(key => {
-                        return selectedConditions[key].includes(item[key]);
-                    });
-                });
-            }
-
-            // 4. 渲染筛选后的明细
-            renderData(list);
-
-            // 5. 展示统计结果
-            let summaryText = '【组合条件筛选结果】';
-            if (activeKeys.length > 0) {
-                const descList = [];
-                activeKeys.forEach(k => descList.push(selectedConditions[k].join(',')));
-                summaryText = `【组合统计：${descList.join(' 且 ')}】`;
-            }
-            statTitleText.textContent = summaryText;
-
-            statGridContent.innerHTML = `
-                <div class="stat-card" style="grid-column: 1 / -1;">
-                    <div class="num">${list.length} 次</div>
-                    <div class="title">满足所选条件的总次数</div>
-                </div>
-            `;
-            statResult.style.display = 'block';
-        });
-
-        // 动态计算卡片背景色与毛玻璃 blur 程度
+        // 动态设置窗口透明度
         function setCardOpacity(val) {
             const alpha = val / 100;
             const blurPx = Math.round((val / 100) * 12);
+            const appCards = document.querySelectorAll('.app-card');
 
             appCards.forEach(card => {
                 card.style.background = `rgba(255, 255, 255, ${alpha})`;
@@ -431,5 +349,85 @@
             });
         }
 
-        document.getElementById('open-settings-btn').onclick = () => settingsModal.classList.add('active');
-        document.getElementById('close-settings-btn').onclick = () => settingsModal.classList.remove('active'
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            renderData();
+
+            const bgOverlay = document.getElementById('bg-overlay');
+            const savedBg = localStorage.getItem('app_wallpaper');
+            const savedOpacity = localStorage.getItem('app_wallpaper_opacity') || '80';
+            const savedCardOpacity = localStorage.getItem('app_card_opacity') || '20';
+
+            if (savedBg) { 
+                bgOverlay.style.backgroundImage = `url(${savedBg})`; 
+                document.getElementById('reset-bg').style.display = 'inline-block'; 
+            }
+            
+            document.getElementById('opacity-range').value = savedOpacity;
+            document.getElementById('opacity-value').textContent = savedOpacity + '%';
+            bgOverlay.style.opacity = savedOpacity / 100;
+
+            document.getElementById('card-opacity-range').value = savedCardOpacity;
+            document.getElementById('card-opacity-value').textContent = savedCardOpacity + '%';
+            setCardOpacity(savedCardOpacity);
+
+            // 表单提交（保存）
+            document.getElementById('data-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const now = new Date();
+                const record = {
+                    id: Date.now(),
+                    date: now.toISOString().split('T')[0],
+                    time: now.toLocaleString(),
+                    mzLevel: document.getElementById('mz-level').value,
+                    deptName: document.getElementById('dept-name').value,
+                    mzMethod: document.getElementById('mz-method').value,
+                    asaLevel: document.getElementById('asa-level').value,
+                    opLevel: document.getElementById('op-level').value
+                };
+
+                const list = getRecords();
+                list.unshift(record);
+                saveRecords(list);
+                alert('保存成功！');
+                renderData();
+            });
+
+            // 统计与过滤按钮
+            document.getElementById('filter-btn').addEventListener('click', () => {
+                const start = document.getElementById('start-date').value;
+                const end = document.getElementById('end-date').value;
+                let list = getRecords();
+
+                if (start) list = list.filter(item => item.date >= start);
+                if (end) list = list.filter(item => item.date <= end);
+
+                const selectedConditions = {};
+                document.querySelectorAll('.checkbox-group').forEach(group => {
+                    const groupKey = group.getAttribute('data-group');
+                    const checkedValues = Array.from(group.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+                    if (checkedValues.length > 0) {
+                        selectedConditions[groupKey] = checkedValues;
+                    }
+                });
+
+                const activeKeys = Object.keys(selectedConditions);
+                if (activeKeys.length > 0) {
+                    list = list.filter(item => {
+                        return activeKeys.every(key => {
+                            return selectedConditions[key].includes(item[key]);
+                        });
+                    });
+                }
+
+                renderData(list);
+
+                let summaryText = '【组合条件筛选结果】';
+                if (activeKeys.length > 0) {
+                    const descList = [];
+                    activeKeys.forEach(k => descList.push(selectedConditions[k].join(',')));
+                    summaryText = `【组合统计：${descList.join(' 且 ')}】`;
+                }
+                document.getElementById('stat-title-text').textContent = summaryText;
+
+                document.getElementById('stat-grid-content').innerHTML = `
