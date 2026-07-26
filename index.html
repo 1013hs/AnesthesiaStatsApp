@@ -15,53 +15,90 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             min-height: 100vh;
             position: relative;
-            background-color: #f5f5f7;
+            background-color: #000;
             color: #333;
+            overflow-x: hidden;
         }
 
-        /* 背景壁纸遮罩层 */
+        /* 全屏背景壁纸层 */
         #bg-overlay {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            z-index: -1;
-            opacity: 0.3; /* 默认透明度 30% */
+            z-index: 0;
+            opacity: 0.5;
             transition: opacity 0.2s ease;
         }
 
-        /* 主容器 */
-        .container {
+        /* 页面应用容器 */
+        .app-container {
+            position: relative;
+            z-index: 1;
             max-width: 600px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 16px;
+            padding-top: 60px; /* 留出顶部导航高度 */
         }
 
-        /* 控制面板卡片 */
+        /* 顶部导航栏 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 10;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .settings-icon-btn {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        /* 通用毛玻璃卡片 */
         .card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border-radius: 16px;
             padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.4);
         }
 
         h2 {
-            font-size: 1.2rem;
-            margin-bottom: 15px;
+            font-size: 1.15rem;
+            margin-bottom: 12px;
             color: #1d1d1f;
         }
 
         .setting-group {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 14px;
         }
 
         .row {
@@ -75,7 +112,6 @@
             font-weight: 500;
         }
 
-        /* 隐藏原生的 file input，用 label 自定义按钮 */
         input[type="file"] {
             display: none;
         }
@@ -83,31 +119,43 @@
         .btn {
             background-color: #007aff;
             color: #fff;
-            padding: 8px 16px;
-            border-radius: 8px;
+            padding: 9px 18px;
+            border-radius: 10px;
             border: none;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            font-weight: 500;
             cursor: pointer;
             display: inline-block;
             text-align: center;
-            transition: background-color 0.2s;
+            transition: all 0.2s;
         }
 
         .btn:active {
-            background-color: #0056b3;
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .btn-success {
+            background-color: #34c759;
+            width: 100%;
+            margin-top: 10px;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 600;
         }
 
         .btn-danger {
             background-color: #ff3b30;
+            padding: 8px 14px;
+            font-size: 0.85rem;
         }
 
-        /* 透明度滑块 */
+        /* 滑块配置 */
         .range-slider {
             display: flex;
             align-items: center;
             gap: 10px;
             width: 100%;
-            margin-top: 5px;
         }
 
         input[type="range"] {
@@ -121,43 +169,87 @@
             font-size: 0.9rem;
             width: 40px;
             text-align: right;
-            color: #666;
+            color: #555;
+            font-weight: 600;
+        }
+
+        /* 遮罩弹窗层（壁纸设置 modal） */
+        .modal-mask {
+            display: none; /* 默认隐藏，配置好后进入主界面 */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-mask.active {
+            display: flex;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 450px;
         }
     </style>
 </head>
 <body>
 
-    <!-- 背景壁纸层 -->
+    <!-- 全屏背景壁纸 -->
     <div id="bg-overlay"></div>
 
-    <div class="container">
-        <!-- 壁纸设置区域 -->
+    <!-- 顶部固定导航栏 -->
+    <div class="navbar">
+        <span class="nav-title">麻醉统计</span>
+        <button class="settings-icon-btn" id="open-settings-btn" title="设置壁纸">⚙️ 壁纸设置</button>
+    </div>
+
+    <!-- App 主页面内容 -->
+    <div class="app-container">
         <div class="card">
+            <h2>📊 麻醉数据统计主界面</h2>
+            <p style="color: #444; line-height: 1.6; font-size: 0.95rem;">
+                欢迎使用麻醉统计系统！<br>
+                你可以点击右上角的 <b>⚙️ 壁纸设置</b> 随时更换背景和调整透明度。
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>📈 今日手术记录</h2>
+            <p style="color: #666; font-size: 0.9rem;">暂无最新记录，请开始录入...</p>
+        </div>
+    </div>
+
+    <!-- 壁纸设置弹窗 -->
+    <div class="modal-mask" id="settings-modal">
+        <div class="modal-content card">
             <h2>🎨 壁纸与外观设置</h2>
             <div class="setting-group">
                 <div class="row">
-                    <label>自定义壁纸：</label>
-                    <div>
+                    <label>自定义背景照片：</label>
+                    <div style="display: flex; gap: 8px;">
                         <label for="wallpaper-upload" class="btn">选择图片</label>
                         <input type="file" id="wallpaper-upload" accept="image/*">
                         <button id="reset-bg" class="btn btn-danger" style="display:none;">重置</button>
                     </div>
                 </div>
 
-                <div class="setting-group" style="margin-top: 8px;">
-                    <label>壁纸透明度：</label>
+                <div class="setting-group" style="margin-top: 4px;">
+                    <label>背景壁纸透明度：</label>
                     <div class="range-slider">
-                        <input type="range" id="opacity-range" min="0" max="100" value="30">
-                        <span id="opacity-value" class="opacity-val">30%</span>
+                        <input type="range" id="opacity-range" min="0" max="100" value="50">
+                        <span id="opacity-value" class="opacity-val">50%</span>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- 你的主应用界面内容加在这里 -->
-        <div class="card">
-            <h2>📊 麻醉统计主界面</h2>
-            <p style="color: #666; font-size: 0.9rem;">软件已成功运行！你可以在上方随心调整背景壁纸及透明度。</p>
+                <!-- 进入主界面按钮 -->
+                <button class="btn btn-success" id="close-settings-btn">进入主界面</button>
+            </div>
         </div>
     </div>
 
@@ -167,11 +259,16 @@
         const resetBtn = document.getElementById('reset-bg');
         const opacityRange = document.getElementById('opacity-range');
         const opacityValue = document.getElementById('opacity-value');
+        
+        const settingsModal = document.getElementById('settings-modal');
+        const openSettingsBtn = document.getElementById('open-settings-btn');
+        const closeSettingsBtn = document.getElementById('close-settings-btn');
 
-        // 1. 初始化读取本地保存的壁纸与透明度
+        // 1. 初始化读取保存的壁纸与配置
         window.addEventListener('DOMContentLoaded', () => {
             const savedBg = localStorage.getItem('app_wallpaper');
-            const savedOpacity = localStorage.getItem('app_wallpaper_opacity') || '30';
+            const savedOpacity = localStorage.getItem('app_wallpaper_opacity') || '50';
+            const isFirstTime = localStorage.getItem('app_configured') !== 'true';
 
             if (savedBg) {
                 bgOverlay.style.backgroundImage = `url(${savedBg})`;
@@ -181,9 +278,24 @@
             opacityRange.value = savedOpacity;
             opacityValue.textContent = savedOpacity + '%';
             bgOverlay.style.opacity = savedOpacity / 100;
+
+            // 如果是第一次运行，默认弹出壁纸配置；后续直接进入主界面
+            if (isFirstTime) {
+                settingsModal.classList.add('active');
+            }
         });
 
-        // 2. 上传壁纸处理
+        // 打开 / 关闭设置弹窗
+        openSettingsBtn.addEventListener('click', () => {
+            settingsModal.classList.add('active');
+        });
+
+        closeSettingsBtn.addEventListener('click', () => {
+            localStorage.setItem('app_configured', 'true');
+            settingsModal.classList.remove('active');
+        });
+
+        // 2. 上传图片处理
         uploadInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -192,7 +304,6 @@
                     const base64Img = evt.target.result;
                     bgOverlay.style.backgroundImage = `url(${base64Img})`;
                     resetBtn.style.display = 'inline-block';
-                    // 保存至本地存储
                     try {
                         localStorage.setItem('app_wallpaper', base64Img);
                     } catch (err) {
@@ -211,7 +322,7 @@
             uploadInput.value = '';
         });
 
-        // 4. 调整透明度实时响应
+        // 4. 透明度调整
         opacityRange.addEventListener('input', (e) => {
             const val = e.target.value;
             opacityValue.textContent = val + '%';
