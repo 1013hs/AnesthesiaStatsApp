@@ -1,0 +1,10 @@
+{
+  "name": "anesthesia-stats",
+  "version": "1.0.0",
+  "description": "Anesthesia and Surgery Statistics App",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'No compile needed'"
+  },
+  "dependencies": {}
+}
