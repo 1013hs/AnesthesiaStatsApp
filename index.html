@@ -19,13 +19,13 @@
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
             background-size: cover; background-position: center; background-repeat: no-repeat;
-            z-index: 0; opacity: 0.6; transition: opacity 0.2s ease;
+            z-index: 0; opacity: 0.8; transition: opacity 0.2s ease;
         }
 
         /* 顶部导航栏 */
         .navbar {
             position: fixed; top: 0; left: 0; right: 0; height: 50px;
-            background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
             z-index: 10; border-bottom: 1px solid rgba(255, 255, 255, 0.3);
         }
@@ -38,45 +38,55 @@
             padding: 16px; padding-top: 62px;
         }
 
-        /* 毛玻璃卡片（窗口透明度可通过 JS 动态调节） */
+        /* 窗口卡片：支持完全透明 */
         .card {
-            background: rgba(255, 255, 255, 0.55); /* 默认 55% 半透明，通透度大大提升 */
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             border-radius: 16px; padding: 18px; margin-bottom: 16px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12); border: 1px solid rgba(255, 255, 255, 0.4);
-            transition: background 0.2s ease;
+            transition: all 0.2s ease;
         }
 
-        h2 { font-size: 1.1rem; margin-bottom: 12px; color: #1d1d1f; display: flex; justify-content: space-between; align-items: center; }
+        /* 增强文字可读性，即使全透明也能清晰识别 */
+        h2 { 
+            font-size: 1.1rem; margin-bottom: 12px; color: #1d1d1f; 
+            display: flex; justify-content: space-between; align-items: center;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
 
         .form-group { margin-bottom: 12px; }
-        label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: #222; }
+        label { 
+            display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 6px; color: #1d1d1f; 
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+
+        /* 输入框与按钮保持高清晰度（不透明） */
         select, input {
-            width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(0, 0, 0, 0.12);
-            background: rgba(255, 255, 255, 0.75); font-size: 0.95rem; outline: none;
+            width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.95); font-size: 0.95rem; outline: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
         .btn {
             background-color: #007aff; color: #fff; padding: 12px; border-radius: 10px; border: none;
             font-size: 1rem; font-weight: 600; width: 100%; cursor: pointer; text-align: center; margin-top: 8px;
+            box-shadow: 0 4px 10px rgba(0,122,255,0.3);
         }
-        .btn-secondary { background-color: #5856d6; }
-        .btn-danger { background-color: #ff3b30; padding: 6px 12px; font-size: 0.8rem; width: auto; }
+        .btn-secondary { background-color: #5856d6; box-shadow: 0 4px 10px rgba(88,86,214,0.3); }
+        .btn-danger { background-color: #ff3b30; padding: 6px 12px; font-size: 0.8rem; width: auto; box-shadow: none; }
 
-        /* 统计结果卡片 */
+        /* 统计结果 */
         .stat-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 10px;
         }
         .stat-card {
-            background: rgba(255, 255, 255, 0.65); border-radius: 8px; padding: 10px; text-align: center;
-            border: 1px solid rgba(0,0,0,0.05);
+            background: rgba(255, 255, 255, 0.9); border-radius: 8px; padding: 10px; text-align: center;
+            border: 1px solid rgba(0,0,0,0.1);
         }
         .stat-card .num { font-size: 1.2rem; font-weight: 700; color: #007aff; }
-        .stat-card .title { font-size: 0.75rem; color: #444; }
+        .stat-card .title { font-size: 0.75rem; color: #333; }
 
         .record-item {
-            background: rgba(255, 255, 255, 0.55); border-radius: 10px; padding: 10px; margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.9); border-radius: 10px; padding: 10px; margin-bottom: 8px;
             display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         }
 
         /* 设置弹窗 */
@@ -177,19 +187,19 @@
 
             <!-- 各类别详细统计结果 -->
             <div id="stat-result" style="margin-top: 15px; display: none;">
-                <h3 style="font-size: 0.95rem; margin-bottom: 8px; color: #007aff;">【各分类独立计数汇总】</h3>
+                <h3 style="font-size: 0.95rem; margin-bottom: 8px; color: #007aff; text-shadow:0 1px 2px rgba(255,255,255,0.8);">【各分类独立计数汇总】</h3>
                 <div class="stat-grid" id="stat-grid-content"></div>
             </div>
 
             <!-- 明细明细记录列表 -->
-            <h3 style="font-size: 0.95rem; margin-top: 15px; margin-bottom: 8px;">【历史明细列表】</h3>
+            <h3 style="font-size: 0.95rem; margin-top: 15px; margin-bottom: 8px; text-shadow:0 1px 2px rgba(255,255,255,0.8);">【历史明细列表】</h3>
             <div id="records-list"></div>
         </div>
     </div>
 
     <!-- 外观与壁纸设置弹窗 -->
     <div class="modal-mask" id="settings-modal">
-        <div class="modal-content card" style="background: rgba(255,255,255,0.92);">
+        <div class="modal-content card" style="background: rgba(255,255,255,0.95); box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
             <h2>🎨 外观与透明度设置</h2>
             
             <div class="form-group">
@@ -202,18 +212,18 @@
             </div>
 
             <div class="form-group" style="margin-top: 15px;">
-                <label>1. 背景壁纸透明度：</label>
+                <label>1. 背景壁纸清晰度：</label>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="range" id="opacity-range" min="0" max="100" value="60" style="flex:1;">
-                    <span id="opacity-value" style="font-weight: 600; width: 40px;">60%</span>
+                    <input type="range" id="opacity-range" min="0" max="100" value="80" style="flex:1;">
+                    <span id="opacity-value" style="font-weight: 600; width: 40px;">80%</span>
                 </div>
             </div>
 
             <div class="form-group" style="margin-top: 15px;">
-                <label>2. 窗口卡片透明度（透明些透出壁纸）：</label>
+                <label>2. 窗口背景透明度（0%为完全透明）：</label>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="range" id="card-opacity-range" min="10" max="95" value="55" style="flex:1;">
-                    <span id="card-opacity-value" style="font-weight: 600; width: 40px;">55%</span>
+                    <input type="range" id="card-opacity-range" min="0" max="100" value="20" style="flex:1;">
+                    <span id="card-opacity-value" style="font-weight: 600; width: 40px;">20%</span>
                 </div>
             </div>
 
@@ -240,11 +250,9 @@
         
         const settingsModal = document.getElementById('settings-modal');
 
-        // 读取与保存本地数据
         function getRecords() { return JSON.parse(localStorage.getItem('mz_data_records') || '[]'); }
         function saveRecords(data) { localStorage.setItem('mz_data_records', JSON.stringify(data)); }
 
-        // 保存新记录
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             const record = {
@@ -265,11 +273,10 @@
             renderData();
         });
 
-        // 渲染明细列表
         function renderData(filteredList = null) {
             const list = filteredList || getRecords();
             if (list.length === 0) {
-                recordsList.innerHTML = '<p style="text-align:center; color:#555; padding:15px;">暂无数据记录</p>';
+                recordsList.innerHTML = '<p style="text-align:center; color:#222; font-weight:600; padding:15px; text-shadow:0 1px 2px rgba(255,255,255,0.8);">暂无数据记录</p>';
                 return;
             }
 
@@ -280,14 +287,13 @@
                         <div style="color:#444; font-size:0.75rem; margin-top:2px;">
                             麻醉分级:${item.mzLevel} | ASA:${item.asaLevel} | 手术:${item.opLevel}
                         </div>
-                        <div style="color:#777; font-size:0.7rem;">${item.time}</div>
+                        <div style="color:#666; font-size:0.7rem;">${item.time}</div>
                     </div>
                     <button class="btn btn-danger" onclick="deleteItem(${item.id})">删除</button>
                 </div>
             `).join('');
         }
 
-        // 删除单条记录
         window.deleteItem = function(id) {
             let list = getRecords();
             list = list.filter(item => item.id !== id);
@@ -295,7 +301,6 @@
             renderData();
         };
 
-        // 按时间段统计
         filterBtn.addEventListener('click', () => {
             const start = document.getElementById('start-date').value;
             const end = document.getElementById('end-date').value;
@@ -324,25 +329,34 @@
             statResult.style.display = 'block';
         });
 
-        // 改变窗口卡片透明度函数
+        // 动态计算卡片背景色与毛玻璃 blur 程度
         function setCardOpacity(val) {
             const alpha = val / 100;
+            const blurPx = Math.round((val / 100) * 12); // 从 0px 到 12px
+
             appCards.forEach(card => {
                 card.style.background = `rgba(255, 255, 255, ${alpha})`;
+                card.style.backdropFilter = `blur(${blurPx}px)`;
+                card.style.webkitBackdropFilter = `blur(${blurPx}px)`;
+                if (val == 0) {
+                    card.style.border = 'none';
+                    card.style.boxShadow = 'none';
+                } else {
+                    card.style.border = '1px solid rgba(255, 255, 255, 0.4)';
+                    card.style.boxShadow = '0 8px 24px rgba(0,0,0,0.1)';
+                }
             });
         }
 
-        // 外观设置面板逻辑
         document.getElementById('open-settings-btn').onclick = () => settingsModal.classList.add('active');
         document.getElementById('close-settings-btn').onclick = () => settingsModal.classList.remove('active');
 
         window.addEventListener('DOMContentLoaded', () => {
             renderData();
             
-            // 读取壁纸设置
             const savedBg = localStorage.getItem('app_wallpaper');
-            const savedOpacity = localStorage.getItem('app_wallpaper_opacity') || '60';
-            const savedCardOpacity = localStorage.getItem('app_card_opacity') || '55';
+            const savedOpacity = localStorage.getItem('app_wallpaper_opacity') || '80';
+            const savedCardOpacity = localStorage.getItem('app_card_opacity') || '20';
 
             if (savedBg) { bgOverlay.style.backgroundImage = `url(${savedBg})`; resetBtn.style.display = 'inline-block'; }
             
@@ -350,7 +364,6 @@
             opacityValue.textContent = savedOpacity + '%';
             bgOverlay.style.opacity = savedOpacity / 100;
 
-            // 应用保存的卡片透明度
             cardOpacityRange.value = savedCardOpacity;
             cardOpacityValue.textContent = savedCardOpacity + '%';
             setCardOpacity(savedCardOpacity);
@@ -376,7 +389,6 @@
             resetBtn.style.display = 'none';
         };
 
-        // 调整背景透明度
         opacityRange.oninput = (e) => {
             const val = e.target.value;
             opacityValue.textContent = val + '%';
@@ -384,7 +396,6 @@
             localStorage.setItem('app_wallpaper_opacity', val);
         };
 
-        // 调整卡片/窗口透明度
         cardOpacityRange.oninput = (e) => {
             const val = e.target.value;
             cardOpacityValue.textContent = val + '%';
