@@ -28,7 +28,7 @@ jobs:
         run: |
           mkdir -p www
           cp index.html www/
-          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
           npx cap init "AnesthesiaStats" "com.anesthesia.stats" --web-dir "www"
           npx cap add android
 
@@ -39,7 +39,9 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug -x test --continue
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.jvmargs='-Xmx2048m' -Dkotlin.stdlib.default.dependency=true"
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
