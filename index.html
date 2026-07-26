@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>麻醉与手术统计系统</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #f4f6f9; color: #333; padding: 16px; }
+        .card { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 16px; }
+        h2 { font-size: 18px; color: #1e293b; margin-bottom: 16px; font-weight: 600; text-align: center; }
+        .form-group { margin-bottom: 14px; }
+        label { display: block; font-size: 14px; font-weight: 500; color: #64748b; margin-bottom: 6px; }
+        select { width: 100%; height: 44px; padding: 0 12px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; outline: none; }
+        select:focus { border-color: #3b82f6; }
+        .btn { width: 100%; height: 46px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 8px; }
+        .btn-primary { background: #2563eb; color: #fff; }
+        .btn-secondary { background: #e2e8f0; color: #475569; margin-top: 10px; }
+        .tab-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: 600; background: #e2e8f0; color: #64748b; }
+        .tab-btn.active { background: #2563eb; color: #fff; }
+        .date-range { display: flex; gap: 8px; margin-bottom: 12px; }
+        .date-range input { flex: 1; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
+        .stat-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+        .stat-card h3 { font-size: 15px; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 8px; }
+        .stat-item { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; color: #475569; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="tab-bar">
+        <button class="tab-btn active" id="tabEntryBtn" onclick="switchTab('entry')">数据录入</button>
+        <button class="tab-btn" id="tabStatsBtn" onclick="switchTab('stats')">历史统计</button>
+    </div>
+
+    <!-- 录入页面 -->
+    <div id="entryTab" class="card">
+        <h2>麻醉与手术信息登记</h2>
+        
+        <div class="form-group">
+            <label>麻醉分级</label>
+            <select id="anesGrade">
+                <option value="Ⅰ级">Ⅰ级</option>
+                <option value="Ⅱ级">Ⅱ级</option>
+                <option value="Ⅲ级">Ⅲ级</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>科室名称</label>
+            <select id="department">
+                <option value="外一科">外一科</option>
+                <option value="外二科">外二科</option>
+                <option value="外三科">外三科</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>麻醉方式</label>
+            <select id="anesMethod">
+                <option value="全麻">全麻</option>
+                <option value="支气管内麻醉">支气管内麻醉</option>
+                <option value="无插管全麻">无插管全麻</option>
+                <option value="腰硬联合">腰硬联合</option>
+                <option value="腰麻">腰麻</option>
+                <option value="神经阻滞">神经阻滞</option>
+                <option value="局麻">局麻</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>ASA分级</label>
+            <select id="asaGrade">
+                <option value="Ⅰ级">Ⅰ级</option>
+                <option value="Ⅱ级">Ⅱ级</option>
+                <option value="Ⅲ级">Ⅲ级</option>
+                <option value="Ⅳ级">Ⅳ级</option>
+                <option value="Ⅴ级">Ⅴ级</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>手术分级</label>
+            <select id="surgGrade">
+                <option value="一级">一级</option>
+                <option value="二级">二级</option>
+                <option value="三级">三级</option>
+                <option value="四级">四级</option>
+            </select>
+        </div>
+
+        <button class="btn btn-primary" onclick="saveRecord()">提交保存</button>
+    </div>
+
+    <!-- 统计页面 -->
+    <div id="statsTab" class="card hidden">
+        <h2>历史数据分类统计</h2>
+        <div class="date-range">
+            <input type="date" id="startDate">
+            <input type="date" id="endDate">
+        </div>
+        <button class="btn btn-secondary" onclick="renderStats()" style="margin-top:0; margin-bottom:16px;">按时间筛选统计</button>
+
+        <div id="statsResult"></div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            document.getElementById('entryTab').classList.toggle('hidden', tab !== 'entry');
+            document.getElementById('statsTab').classList.toggle('hidden', tab !== 'stats');
+            document.getElementById('tabEntryBtn').classList.toggle('active', tab === 'entry');
+            document.getElementById('tabStatsBtn').classList.toggle('active', tab === 'stats');
+            if(tab === 'stats') renderStats();
+        }
+
+        function saveRecord() {
+            const record = {
+                date: new Date().toISOString().split('T')[0],
+                anesGrade: document.getElementById('anesGrade').value,
+                department: document.getElementById('department').value,
+                anesMethod: document.getElementById('anesMethod').value,
+                asaGrade: document.getElementById('asaGrade').value,
+                surgGrade: document.getElementById('surgGrade').value
+            };
+
+            const records = JSON.parse(localStorage.getItem('anes_records') || '[]');
+            records.push(record);
+            localStorage.setItem('anes_records', JSON.stringify(records));
+            alert('保存成功！');
+        }
+
+        function renderStats() {
+            const records = JSON.parse(localStorage.getItem('anes_records') || '[]');
+            const start = document.getElementById('startDate').value;
+            const end = document.getElementById('endDate').value;
+
+            const filtered = records.filter(r => {
+                if (start && r.date < start) return false;
+                if (end && r.date > end) return false;
+                return true;
+            });
+
+            const categories = {
+                anesGrade: '麻醉分级',
+                department: '科室名称',
+                anesMethod: '麻醉方式',
+                asaGrade: 'ASA分级',
+                surgGrade: '手术分级'
+            };
+
+            let html = `<p style="font-size:13px; color:#64748b; margin-bottom:12px;">符合条件记录共: <b>${filtered.length}</b> 条</p>`;
+
+            for (let key in categories) {
+                const counts = {};
+                filtered.forEach(r => {
+                    const val = r[key];
+                    counts[val] = (counts[val] || 0) + 1;
+                });
+
+                html += `<div class="stat-card"><h3>${categories[key]}</h3>`;
+                if(Object.keys(counts).length === 0) {
+                    html += `<div class="stat-item"><span>暂无数据</span><span>0 次</span></div>`;
+                } else {
+                    for (let item in counts) {
+                        html += `<div class="stat-item"><span>${item}</span><span><b>${counts[item]}</b> 次</span></div>`;
+                    }
+                }
+                html += `</div>`;
+            }
+
+            document.getElementById('statsResult').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
