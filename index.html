@@ -10,7 +10,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             min-height: 100vh;
             background-color: #121212;
-            color: #333;
+            color: #1d1d1f;
             overflow-x: hidden;
         }
 
@@ -19,13 +19,13 @@
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
             background-size: cover; background-position: center; background-repeat: no-repeat;
-            z-index: 0; opacity: 0.4; transition: opacity 0.2s ease;
+            z-index: 0; opacity: 0.6; transition: opacity 0.2s ease;
         }
 
         /* 顶部导航栏 */
         .navbar {
             position: fixed; top: 0; left: 0; right: 0; height: 50px;
-            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
             z-index: 10; border-bottom: 1px solid rgba(255, 255, 255, 0.3);
         }
@@ -38,20 +38,22 @@
             padding: 16px; padding-top: 62px;
         }
 
-        /* 毛玻璃卡片 */
+        /* 毛玻璃卡片（窗口透明度可通过 JS 动态调节） */
         .card {
-            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.55); /* 默认 55% 半透明，通透度大大提升 */
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             border-radius: 16px; padding: 18px; margin-bottom: 16px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12); border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12); border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: background 0.2s ease;
         }
 
         h2 { font-size: 1.1rem; margin-bottom: 12px; color: #1d1d1f; display: flex; justify-content: space-between; align-items: center; }
 
         .form-group { margin-bottom: 12px; }
-        label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: #444; }
+        label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: #222; }
         select, input {
-            width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(0, 0, 0, 0.15);
-            background: rgba(255, 255, 255, 0.9); font-size: 0.95rem; outline: none;
+            width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(0, 0, 0, 0.12);
+            background: rgba(255, 255, 255, 0.75); font-size: 0.95rem; outline: none;
         }
 
         .btn {
@@ -66,17 +68,16 @@
             display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 10px;
         }
         .stat-card {
-            background: rgba(255, 255, 255, 0.7); border-radius: 8px; padding: 10px; text-align: center;
+            background: rgba(255, 255, 255, 0.65); border-radius: 8px; padding: 10px; text-align: center;
             border: 1px solid rgba(0,0,0,0.05);
         }
         .stat-card .num { font-size: 1.2rem; font-weight: 700; color: #007aff; }
-        .stat-card .title { font-size: 0.75rem; color: #666; }
+        .stat-card .title { font-size: 0.75rem; color: #444; }
 
         .record-item {
-            background: rgba(255, 255, 255, 0.6); border-radius: 10px; padding: 10px; margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.55); border-radius: 10px; padding: 10px; margin-bottom: 8px;
             display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;
         }
-        .tag { background: #e5f1ff; color: #007aff; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
 
         /* 设置弹窗 */
         .modal-mask {
@@ -93,12 +94,12 @@
     <!-- 顶栏 -->
     <div class="navbar">
         <span class="nav-title">💉 麻醉统计系统</span>
-        <button class="icon-btn" id="open-settings-btn">⚙️ 壁纸设置</button>
+        <button class="icon-btn" id="open-settings-btn">⚙️ 外观设置</button>
     </div>
 
     <div class="app-container">
         <!-- 5大输入框选框卡片 -->
-        <div class="card">
+        <div class="card app-card">
             <h2>📝 麻醉数据录入</h2>
             <form id="data-form">
                 <div class="form-group">
@@ -158,7 +159,7 @@
         </div>
 
         <!-- 历史记录与时间段统计卡片 -->
-        <div class="card">
+        <div class="card app-card">
             <h2>📅 历史记录与统计</h2>
             
             <div style="display: flex; gap: 8px; margin-bottom: 10px;">
@@ -186,10 +187,10 @@
         </div>
     </div>
 
-    <!-- 壁纸设置弹窗 -->
+    <!-- 外观与壁纸设置弹窗 -->
     <div class="modal-mask" id="settings-modal">
-        <div class="modal-content card">
-            <h2>🎨 壁纸与外观设置</h2>
+        <div class="modal-content card" style="background: rgba(255,255,255,0.92);">
+            <h2>🎨 外观与透明度设置</h2>
             
             <div class="form-group">
                 <label>选择自定义背景照片：</label>
@@ -201,10 +202,18 @@
             </div>
 
             <div class="form-group" style="margin-top: 15px;">
-                <label>壁纸透明度：</label>
+                <label>1. 背景壁纸透明度：</label>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="range" id="opacity-range" min="0" max="100" value="40" style="flex:1;">
-                    <span id="opacity-value" style="font-weight: 600; width: 40px;">40%</span>
+                    <input type="range" id="opacity-range" min="0" max="100" value="60" style="flex:1;">
+                    <span id="opacity-value" style="font-weight: 600; width: 40px;">60%</span>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px;">
+                <label>2. 窗口卡片透明度（透明些透出壁纸）：</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="range" id="card-opacity-range" min="10" max="95" value="55" style="flex:1;">
+                    <span id="card-opacity-value" style="font-weight: 600; width: 40px;">55%</span>
                 </div>
             </div>
 
@@ -224,13 +233,18 @@
         const resetBtn = document.getElementById('reset-bg');
         const opacityRange = document.getElementById('opacity-range');
         const opacityValue = document.getElementById('opacity-value');
+        
+        const cardOpacityRange = document.getElementById('card-opacity-range');
+        const cardOpacityValue = document.getElementById('card-opacity-value');
+        const appCards = document.querySelectorAll('.app-card');
+        
         const settingsModal = document.getElementById('settings-modal');
 
         // 读取与保存本地数据
         function getRecords() { return JSON.parse(localStorage.getItem('mz_data_records') || '[]'); }
         function saveRecords(data) { localStorage.setItem('mz_data_records', JSON.stringify(data)); }
 
-        // 保存新的记录
+        // 保存新记录
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             const record = {
@@ -251,22 +265,22 @@
             renderData();
         });
 
-        // 渲染明细列表与默认统计
+        // 渲染明细列表
         function renderData(filteredList = null) {
             const list = filteredList || getRecords();
             if (list.length === 0) {
-                recordsList.innerHTML = '<p style="text-align:center; color:#777; padding:15px;">暂无数据记录</p>';
+                recordsList.innerHTML = '<p style="text-align:center; color:#555; padding:15px;">暂无数据记录</p>';
                 return;
             }
 
-            recordsList.innerHTML = list.map((item, index) => `
+            recordsList.innerHTML = list.map((item) => `
                 <div class="record-item">
                     <div>
                         <div><b>${item.deptName}</b> | 麻醉:${item.mzMethod}</div>
-                        <div style="color:#666; font-size:0.75rem; margin-top:2px;">
+                        <div style="color:#444; font-size:0.75rem; margin-top:2px;">
                             麻醉分级:${item.mzLevel} | ASA:${item.asaLevel} | 手术:${item.opLevel}
                         </div>
-                        <div style="color:#999; font-size:0.7rem;">${item.time}</div>
+                        <div style="color:#777; font-size:0.7rem;">${item.time}</div>
                     </div>
                     <button class="btn btn-danger" onclick="deleteItem(${item.id})">删除</button>
                 </div>
@@ -281,7 +295,7 @@
             renderData();
         };
 
-        // 按时间段统计各分类数量
+        // 按时间段统计
         filterBtn.addEventListener('click', () => {
             const start = document.getElementById('start-date').value;
             const end = document.getElementById('end-date').value;
@@ -292,7 +306,6 @@
 
             renderData(list);
 
-            // 分类计数统计
             const counts = {};
             list.forEach(item => {
                 ['mzLevel', 'deptName', 'mzMethod', 'asaLevel', 'opLevel'].forEach(key => {
@@ -311,18 +324,36 @@
             statResult.style.display = 'block';
         });
 
+        // 改变窗口卡片透明度函数
+        function setCardOpacity(val) {
+            const alpha = val / 100;
+            appCards.forEach(card => {
+                card.style.background = `rgba(255, 255, 255, ${alpha})`;
+            });
+        }
+
         // 外观设置面板逻辑
         document.getElementById('open-settings-btn').onclick = () => settingsModal.classList.add('active');
         document.getElementById('close-settings-btn').onclick = () => settingsModal.classList.remove('active');
 
         window.addEventListener('DOMContentLoaded', () => {
             renderData();
+            
+            // 读取壁纸设置
             const savedBg = localStorage.getItem('app_wallpaper');
-            const savedOpacity = localStorage.getItem('app_wallpaper_opacity') || '40';
+            const savedOpacity = localStorage.getItem('app_wallpaper_opacity') || '60';
+            const savedCardOpacity = localStorage.getItem('app_card_opacity') || '55';
+
             if (savedBg) { bgOverlay.style.backgroundImage = `url(${savedBg})`; resetBtn.style.display = 'inline-block'; }
+            
             opacityRange.value = savedOpacity;
             opacityValue.textContent = savedOpacity + '%';
             bgOverlay.style.opacity = savedOpacity / 100;
+
+            // 应用保存的卡片透明度
+            cardOpacityRange.value = savedCardOpacity;
+            cardOpacityValue.textContent = savedCardOpacity + '%';
+            setCardOpacity(savedCardOpacity);
         });
 
         uploadInput.addEventListener('change', (e) => {
@@ -345,11 +376,20 @@
             resetBtn.style.display = 'none';
         };
 
+        // 调整背景透明度
         opacityRange.oninput = (e) => {
             const val = e.target.value;
             opacityValue.textContent = val + '%';
             bgOverlay.style.opacity = val / 100;
             localStorage.setItem('app_wallpaper_opacity', val);
+        };
+
+        // 调整卡片/窗口透明度
+        cardOpacityRange.oninput = (e) => {
+            const val = e.target.value;
+            cardOpacityValue.textContent = val + '%';
+            setCardOpacity(val);
+            localStorage.setItem('app_card_opacity', val);
         };
     </script>
 </body>
