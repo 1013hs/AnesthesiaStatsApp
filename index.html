@@ -3,175 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>麻醉与手术统计系统</title>
+    <title>麻醉统计</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: #f4f6f9; color: #333; padding: 16px; }
-        .card { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 16px; }
-        h2 { font-size: 18px; color: #1e293b; margin-bottom: 16px; font-weight: 600; text-align: center; }
-        .form-group { margin-bottom: 14px; }
-        label { display: block; font-size: 14px; font-weight: 500; color: #64748b; margin-bottom: 6px; }
-        select { width: 100%; height: 44px; padding: 0 12px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; outline: none; }
-        select:focus { border-color: #3b82f6; }
-        .btn { width: 100%; height: 46px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 8px; }
-        .btn-primary { background: #2563eb; color: #fff; }
-        .btn-secondary { background: #e2e8f0; color: #475569; margin-top: 10px; }
-        .tab-bar { display: flex; gap: 8px; margin-bottom: 16px; }
-        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: 600; background: #e2e8f0; color: #64748b; }
-        .tab-btn.active { background: #2563eb; color: #fff; }
-        .date-range { display: flex; gap: 8px; margin-bottom: 12px; }
-        .date-range input { flex: 1; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
-        .stat-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
-        .stat-card h3 { font-size: 15px; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 8px; }
-        .stat-item { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; color: #475569; }
-        .hidden { display: none; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            position: relative;
+            background-color: #f5f5f7;
+            color: #333;
+        }
+
+        /* 背景壁纸遮罩层 */
+        #bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -1;
+            opacity: 0.3; /* 默认透明度 30% */
+            transition: opacity 0.2s ease;
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 控制面板卡片 */
+        .card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #1d1d1f;
+        }
+
+        .setting-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        label {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        /* 隐藏原生的 file input，用 label 自定义按钮 */
+        input[type="file"] {
+            display: none;
+        }
+
+        .btn {
+            background-color: #007aff;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: inline-block;
+            text-align: center;
+            transition: background-color 0.2s;
+        }
+
+        .btn:active {
+            background-color: #0056b3;
+        }
+
+        .btn-danger {
+            background-color: #ff3b30;
+        }
+
+        /* 透明度滑块 */
+        .range-slider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            accent-color: #007aff;
+        }
+
+        .opacity-val {
+            font-size: 0.9rem;
+            width: 40px;
+            text-align: right;
+            color: #666;
+        }
     </style>
 </head>
 <body>
 
-    <div class="tab-bar">
-        <button class="tab-btn active" id="tabEntryBtn" onclick="switchTab('entry')">数据录入</button>
-        <button class="tab-btn" id="tabStatsBtn" onclick="switchTab('stats')">历史统计</button>
-    </div>
+    <!-- 背景壁纸层 -->
+    <div id="bg-overlay"></div>
 
-    <!-- 录入页面 -->
-    <div id="entryTab" class="card">
-        <h2>麻醉与手术信息登记</h2>
-        
-        <div class="form-group">
-            <label>麻醉分级</label>
-            <select id="anesGrade">
-                <option value="Ⅰ级">Ⅰ级</option>
-                <option value="Ⅱ级">Ⅱ级</option>
-                <option value="Ⅲ级">Ⅲ级</option>
-            </select>
+    <div class="container">
+        <!-- 壁纸设置区域 -->
+        <div class="card">
+            <h2>🎨 壁纸与外观设置</h2>
+            <div class="setting-group">
+                <div class="row">
+                    <label>自定义壁纸：</label>
+                    <div>
+                        <label for="wallpaper-upload" class="btn">选择图片</label>
+                        <input type="file" id="wallpaper-upload" accept="image/*">
+                        <button id="reset-bg" class="btn btn-danger" style="display:none;">重置</button>
+                    </div>
+                </div>
+
+                <div class="setting-group" style="margin-top: 8px;">
+                    <label>壁纸透明度：</label>
+                    <div class="range-slider">
+                        <input type="range" id="opacity-range" min="0" max="100" value="30">
+                        <span id="opacity-value" class="opacity-val">30%</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label>科室名称</label>
-            <select id="department">
-                <option value="外一科">外一科</option>
-                <option value="外二科">外二科</option>
-                <option value="外三科">外三科</option>
-            </select>
+        <!-- 你的主应用界面内容加在这里 -->
+        <div class="card">
+            <h2>📊 麻醉统计主界面</h2>
+            <p style="color: #666; font-size: 0.9rem;">软件已成功运行！你可以在上方随心调整背景壁纸及透明度。</p>
         </div>
-
-        <div class="form-group">
-            <label>麻醉方式</label>
-            <select id="anesMethod">
-                <option value="全麻">全麻</option>
-                <option value="支气管内麻醉">支气管内麻醉</option>
-                <option value="无插管全麻">无插管全麻</option>
-                <option value="腰硬联合">腰硬联合</option>
-                <option value="腰麻">腰麻</option>
-                <option value="神经阻滞">神经阻滞</option>
-                <option value="局麻">局麻</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>ASA分级</label>
-            <select id="asaGrade">
-                <option value="Ⅰ级">Ⅰ级</option>
-                <option value="Ⅱ级">Ⅱ级</option>
-                <option value="Ⅲ级">Ⅲ级</option>
-                <option value="Ⅳ级">Ⅳ级</option>
-                <option value="Ⅴ级">Ⅴ级</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>手术分级</label>
-            <select id="surgGrade">
-                <option value="一级">一级</option>
-                <option value="二级">二级</option>
-                <option value="三级">三级</option>
-                <option value="四级">四级</option>
-            </select>
-        </div>
-
-        <button class="btn btn-primary" onclick="saveRecord()">提交保存</button>
-    </div>
-
-    <!-- 统计页面 -->
-    <div id="statsTab" class="card hidden">
-        <h2>历史数据分类统计</h2>
-        <div class="date-range">
-            <input type="date" id="startDate">
-            <input type="date" id="endDate">
-        </div>
-        <button class="btn btn-secondary" onclick="renderStats()" style="margin-top:0; margin-bottom:16px;">按时间筛选统计</button>
-
-        <div id="statsResult"></div>
     </div>
 
     <script>
-        function switchTab(tab) {
-            document.getElementById('entryTab').classList.toggle('hidden', tab !== 'entry');
-            document.getElementById('statsTab').classList.toggle('hidden', tab !== 'stats');
-            document.getElementById('tabEntryBtn').classList.toggle('active', tab === 'entry');
-            document.getElementById('tabStatsBtn').classList.toggle('active', tab === 'stats');
-            if(tab === 'stats') renderStats();
-        }
+        const bgOverlay = document.getElementById('bg-overlay');
+        const uploadInput = document.getElementById('wallpaper-upload');
+        const resetBtn = document.getElementById('reset-bg');
+        const opacityRange = document.getElementById('opacity-range');
+        const opacityValue = document.getElementById('opacity-value');
 
-        function saveRecord() {
-            const record = {
-                date: new Date().toISOString().split('T')[0],
-                anesGrade: document.getElementById('anesGrade').value,
-                department: document.getElementById('department').value,
-                anesMethod: document.getElementById('anesMethod').value,
-                asaGrade: document.getElementById('asaGrade').value,
-                surgGrade: document.getElementById('surgGrade').value
-            };
+        // 1. 初始化读取本地保存的壁纸与透明度
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedBg = localStorage.getItem('app_wallpaper');
+            const savedOpacity = localStorage.getItem('app_wallpaper_opacity') || '30';
 
-            const records = JSON.parse(localStorage.getItem('anes_records') || '[]');
-            records.push(record);
-            localStorage.setItem('anes_records', JSON.stringify(records));
-            alert('保存成功！');
-        }
-
-        function renderStats() {
-            const records = JSON.parse(localStorage.getItem('anes_records') || '[]');
-            const start = document.getElementById('startDate').value;
-            const end = document.getElementById('endDate').value;
-
-            const filtered = records.filter(r => {
-                if (start && r.date < start) return false;
-                if (end && r.date > end) return false;
-                return true;
-            });
-
-            const categories = {
-                anesGrade: '麻醉分级',
-                department: '科室名称',
-                anesMethod: '麻醉方式',
-                asaGrade: 'ASA分级',
-                surgGrade: '手术分级'
-            };
-
-            let html = `<p style="font-size:13px; color:#64748b; margin-bottom:12px;">符合条件记录共: <b>${filtered.length}</b> 条</p>`;
-
-            for (let key in categories) {
-                const counts = {};
-                filtered.forEach(r => {
-                    const val = r[key];
-                    counts[val] = (counts[val] || 0) + 1;
-                });
-
-                html += `<div class="stat-card"><h3>${categories[key]}</h3>`;
-                if(Object.keys(counts).length === 0) {
-                    html += `<div class="stat-item"><span>暂无数据</span><span>0 次</span></div>`;
-                } else {
-                    for (let item in counts) {
-                        html += `<div class="stat-item"><span>${item}</span><span><b>${counts[item]}</b> 次</span></div>`;
-                    }
-                }
-                html += `</div>`;
+            if (savedBg) {
+                bgOverlay.style.backgroundImage = `url(${savedBg})`;
+                resetBtn.style.display = 'inline-block';
             }
 
-            document.getElementById('statsResult').innerHTML = html;
-        }
+            opacityRange.value = savedOpacity;
+            opacityValue.textContent = savedOpacity + '%';
+            bgOverlay.style.opacity = savedOpacity / 100;
+        });
+
+        // 2. 上传壁纸处理
+        uploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (evt) {
+                    const base64Img = evt.target.result;
+                    bgOverlay.style.backgroundImage = `url(${base64Img})`;
+                    resetBtn.style.display = 'inline-block';
+                    // 保存至本地存储
+                    try {
+                        localStorage.setItem('app_wallpaper', base64Img);
+                    } catch (err) {
+                        alert('图片尺寸较大，建议上传小于 2MB 的图片');
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 3. 重置壁纸
+        resetBtn.addEventListener('click', () => {
+            bgOverlay.style.backgroundImage = 'none';
+            localStorage.removeItem('app_wallpaper');
+            resetBtn.style.display = 'none';
+            uploadInput.value = '';
+        });
+
+        // 4. 调整透明度实时响应
+        opacityRange.addEventListener('input', (e) => {
+            const val = e.target.value;
+            opacityValue.textContent = val + '%';
+            bgOverlay.style.opacity = val / 100;
+            localStorage.setItem('app_wallpaper_opacity', val);
+        });
     </script>
 </body>
 </html>
-
