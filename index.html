@@ -7,375 +7,224 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, sans-serif;
             min-height: 100vh;
-            background-color: #121212;
-            color: #1d1d1f;
-            overflow-x: hidden;
+            background-color: #f2f2f7;
+            color: #1c1c1e;
+            padding: 16px;
+            padding-top: 60px;
         }
-
-        /* 全屏壁纸背景 */
         #bg-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background-size: cover; background-position: center; background-repeat: no-repeat;
-            z-index: 0; opacity: 0.8; transition: opacity 0.2s ease;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-size: cover; background-position: center;
+            z-index: 0; opacity: 0.8;
         }
-
-        /* 顶部导航栏 */
         .navbar {
             position: fixed; top: 0; left: 0; right: 0; height: 50px;
-            background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px);
             display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
-            z-index: 10; border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            z-index: 10; border-bottom: 1px solid #ccc;
         }
-        .nav-title { font-size: 1.1rem; font-weight: 700; color: #1d1d1f; }
-        .icon-btn { background: none; border: none; font-size: 0.95rem; cursor: pointer; color: #007aff; font-weight: 600; }
-
-        /* 主界面布局 */
-        .app-container {
-            position: relative; z-index: 1; max-width: 600px; margin: 0 auto;
-            padding: 16px; padding-top: 62px;
-        }
-
-        /* 窗口卡片 */
+        .container { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; }
         .card {
-            border-radius: 16px; padding: 18px; margin-bottom: 16px;
-            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px);
+            border-radius: 12px; padding: 16px; margin-bottom: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-
-        h2 { 
-            font-size: 1.1rem; margin-bottom: 12px; color: #1d1d1f; 
-            display: flex; justify-content: space-between; align-items: center;
-            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
-        }
-
-        .form-group { margin-bottom: 12px; }
-        label { 
-            display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 6px; color: #1d1d1f; 
-            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
-        }
-
+        h2 { font-size: 1rem; margin-bottom: 10px; color: #000; }
+        label { display: block; font-size: 0.85rem; font-weight: bold; margin: 8px 0 4px; }
         select, input {
-            width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(0, 0, 0, 0.2);
-            background: rgba(255, 255, 255, 0.95); font-size: 0.95rem; outline: none;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;
+            background: #fff; font-size: 0.95rem; margin-bottom: 6px;
         }
-
         .btn {
-            background-color: #007aff; color: #fff; padding: 12px; border-radius: 10px; border: none;
-            font-size: 1rem; font-weight: 600; width: 100%; cursor: pointer; text-align: center; margin-top: 8px;
-            box-shadow: 0 4px 10px rgba(0,122,255,0.3);
+            background: #007aff; color: #fff; border: none; padding: 12px;
+            border-radius: 8px; width: 100%; font-size: 1rem; font-weight: bold;
+            cursor: pointer; margin-top: 8px;
         }
-        .btn-secondary { background-color: #5856d6; box-shadow: 0 4px 10px rgba(88,86,214,0.3); }
-        .btn-danger { background-color: #ff3b30; padding: 6px 12px; font-size: 0.8rem; width: auto; box-shadow: none; color: white; border: none; border-radius: 6px; }
-
-        /* 多选标签组 */
-        .checkbox-group {
-            display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;
-        }
-        .checkbox-tag {
-            display: inline-flex; align-items: center; gap: 4px;
-            background: rgba(255, 255, 255, 0.9); padding: 6px 10px; border-radius: 8px;
-            font-size: 0.8rem; font-weight: 600; border: 1px solid rgba(0,0,0,0.15); cursor: pointer;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .checkbox-tag input { width: auto; margin: 0; cursor: pointer; }
-
-        .stat-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 10px;
-        }
-        .stat-card {
-            background: rgba(255, 255, 255, 0.9); border-radius: 8px; padding: 10px; text-align: center;
-            border: 1px solid rgba(0,0,0,0.1);
-        }
-        .stat-card .num { font-size: 1.2rem; font-weight: 700; color: #007aff; }
-        .stat-card .title { font-size: 0.75rem; color: #333; }
-
+        .btn-purple { background: #5856d6; }
+        .btn-danger { background: #ff3b30; width: auto; padding: 4px 8px; font-size: 0.8rem; }
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+        .tag { background: #fff; padding: 6px 10px; border-radius: 6px; border: 1px solid #ddd; font-size: 0.8rem; }
         .record-item {
-            background: rgba(255, 255, 255, 0.9); border-radius: 10px; padding: 10px; margin-bottom: 8px;
+            background: #fff; padding: 10px; border-radius: 8px; margin-bottom: 8px;
             display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         }
-
-        /* 设置弹窗 */
-        .modal-mask {
+        .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.5); z-index: 100; justify-content: center; align-items: center; padding: 20px;
+            background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; padding: 20px;
         }
-        .modal-mask.active { display: flex; }
+        .modal.active { display: flex; }
     </style>
 </head>
 <body>
 
     <div id="bg-overlay"></div>
 
-    <!-- 顶栏 -->
     <div class="navbar">
-        <span class="nav-title">💉 麻醉统计系统</span>
-        <button class="icon-btn" id="open-settings-btn">⚙️ 外观设置</button>
+        <b>💉 麻醉统计系统</b>
+        <button id="btn-open-set" style="background:none; border:none; color:#007aff; font-weight:bold;">⚙️ 外观设置</button>
     </div>
 
-    <div class="app-container">
-        <!-- 5大输入框选框卡片 -->
+    <div class="container">
+        <!-- 录入卡片 -->
         <div class="card app-card">
             <h2>📝 麻醉数据录入</h2>
-            <form id="data-form">
-                <div class="form-group">
-                    <label>1. 麻醉分级</label>
-                    <select id="mz-level">
-                        <option value="Ⅰ级">Ⅰ级</option>
-                        <option value="Ⅱ级">Ⅱ级</option>
-                        <option value="Ⅲ级">Ⅲ级</option>
-                    </select>
-                </div>
+            <label>1. 麻醉分级</label>
+            <select id="mz-level"><option>Ⅰ级</option><option>Ⅱ级</option><option>Ⅲ级</option></select>
 
-                <div class="form-group">
-                    <label>2. 科室名称</label>
-                    <select id="dept-name">
-                        <option value="外一科">外一科</option>
-                        <option value="外二科">外二科</option>
-                        <option value="外三科">外三科</option>
-                    </select>
-                </div>
+            <label>2. 科室名称</label>
+            <select id="dept-name"><option>外一科</option><option>外二科</option><option>外三科</option></select>
 
-                <div class="form-group">
-                    <label>3. 麻醉方式</label>
-                    <select id="mz-method">
-                        <option value="全麻">全麻</option>
-                        <option value="支气管内麻醉">支气管内麻醉</option>
-                        <option value="无插管全麻">无插管全麻</option>
-                        <option value="腰硬联合">腰硬联合</option>
-                        <option value="腰麻">腰麻</option>
-                        <option value="神经阻滞">神经阻滞</option>
-                        <option value="局麻">局麻</option>
-                    </select>
-                </div>
+            <label>3. 麻醉方式</label>
+            <select id="mz-method">
+                <option>全麻</option><option>支气管内麻醉</option><option>无插管全麻</option>
+                <option>腰硬联合</option><option>腰麻</option><option>神经阻滞</option><option>局麻</option>
+            </select>
 
-                <div class="form-group">
-                    <label>4. ASA分级</label>
-                    <select id="asa-level">
-                        <option value="Ⅰ级">Ⅰ级</option>
-                        <option value="Ⅱ级">Ⅱ级</option>
-                        <option value="Ⅲ级">Ⅲ级</option>
-                        <option value="Ⅳ级">Ⅳ级</option>
-                        <option value="Ⅴ级">Ⅴ级</option>
-                    </select>
-                </div>
+            <label>4. ASA分级</label>
+            <select id="asa-level"><option>Ⅰ级</option><option>Ⅱ级</option><option>Ⅲ级</option><option>Ⅳ级</option><option>Ⅴ级</option></select>
 
-                <div class="form-group">
-                    <label>5. 手术分级</label>
-                    <select id="op-level">
-                        <option value="一级">一级</option>
-                        <option value="二级">二级</option>
-                        <option value="三级">三级</option>
-                        <option value="四级">四级</option>
-                    </select>
-                </div>
+            <label>5. 手术分级</label>
+            <select id="op-level"><option>一级</option><option>二级</option><option>三级</option><option>四级</option></select>
 
-                <button type="submit" class="btn" id="save-btn">保存此条记录</button>
-            </form>
+            <button class="btn" id="btn-save">保存此条记录</button>
         </div>
 
-        <!-- 历史记录与高级组合统计卡片 -->
+        <!-- 历史与组合统计 -->
         <div class="card app-card">
             <h2>📅 历史记录与统计</h2>
             
-            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                <div style="flex: 1;">
-                    <label>开始日期</label>
-                    <input type="date" id="start-date">
-                </div>
-                <div style="flex: 1;">
-                    <label>结束日期</label>
-                    <input type="date" id="end-date">
-                </div>
+            <div style="display:flex; gap:8px;">
+                <div style="flex:1;"><label>开始日期</label><input type="date" id="start-date"></div>
+                <div style="flex:1;"><label>结束日期</label><input type="date" id="end-date"></div>
             </div>
 
-            <!-- 多项目组合勾选区 -->
-            <div style="background: rgba(255,255,255,0.6); padding: 10px; border-radius: 10px; margin-bottom: 10px; border: 1px solid rgba(0,0,0,0.1);">
-                <label style="color:#007aff; margin-bottom: 6px;">🔍 自定义组合多选（勾选任意1个或多个同时出现）</label>
+            <div style="background:rgba(0,0,0,0.03); padding:10px; border-radius:8px; margin:10px 0;">
+                <label style="color:#007aff; margin-top:0;">🔍 自定义组合多选（同时出现）</label>
                 
-                <div style="font-size:0.75rem; font-weight:700; margin-top:4px;">麻醉分级：</div>
-                <div class="checkbox-group" data-group="mzLevel">
-                    <label class="checkbox-tag"><input type="checkbox" value="Ⅰ级">Ⅰ级</label>
-                    <label class="checkbox-tag"><input type="checkbox" value="Ⅱ级">Ⅱ级</label>
-                    <label class="checkbox-tag"><input type="checkbox" value="Ⅲ级">Ⅲ级</label>
+                <div style="font-size:0.75rem; font-weight:bold;">麻醉分级：</div>
+                <div class="checkbox-group" data-key="mzLevel">
+                    <label class="tag"><input type="checkbox" value="Ⅰ级"> Ⅰ级</label>
+                    <label class="tag"><input type="checkbox" value="Ⅱ级"> Ⅱ级</label>
+                    <label class="tag"><input type="checkbox" value="Ⅲ级"> Ⅲ级</label>
                 </div>
 
-                <div style="font-size:0.75rem; font-weight:700; margin-top:4px;">科室名称：</div>
-                <div class="checkbox-group" data-group="deptName">
-                    <label class="checkbox-tag"><input type="checkbox" value="外一科">外一科</label>
-                    <label class="checkbox-tag"><input type="checkbox" value="外二科">外二科</label>
-                    <label class="checkbox-tag"><input type="checkbox" value="外三科">外三科</label>
+                <div style="font-size:0.75rem; font-weight:bold;">科室名称：</div>
+                <div class="checkbox-group" data-key="deptName">
+                    <label class="tag"><input type="checkbox" value="外一科"> 外一科</label>
+                    <label class="tag"><input type="checkbox" value="外二科"> 外二科</label>
+                    <label class="tag"><input type="checkbox" value="外三科"> 外三科</label>
                 </div>
 
-                <div style="font-size:0.75rem; font-weight:700; margin-top:4px;">麻醉方式：</div>
-                <div class="checkbox-group" data-group="mzMethod">
-                    <label class="checkbox-tag"><input type="checkbox" value="全麻">全麻</label>
-                    <label class="checkbox-tag"><input type="checkbox" value="支气管内麻醉">支气管内麻醉</label>
-                    <label class="checkbox-tag"><input type="checkbox" value="无插管全麻">无插管全麻</label>
-                    <label class="checkbox-tag"><input type="checkbox" value="腰硬联合">腰硬联合</label>
-                    <label class="checkbox-tag"><input type="checkbox" value="腰麻">腰麻</label>
-                    <label class="checkbox-tag"><input type="checkbox" value="神经阻滞">神经阻滞</label>
-                    <label class="checkbox-tag"><input type="checkbox" value="局麻">局麻</label>
+                <div style="font-size:0.75rem; font-weight:bold;">麻醉方式：</div>
+                <div class="checkbox-group" data-key="mzMethod">
+                    <label class="tag"><input type="checkbox" value="全麻"> 全麻</label>
+                    <label class="tag"><input type="checkbox" value="支气管内麻醉"> 支气管内麻醉</label>
+                    <label class="tag"><input type="checkbox" value="无插管全麻"> 无插管全麻</label>
+                    <label class="tag"><input type="checkbox" value="腰硬联合"> 腰硬联合</label>
+                    <label class="tag"><input type="checkbox" value="腰麻"> 腰麻</label>
+                    <label class="tag"><input type="checkbox" value="神经阻滞"> 神经阻滞</label>
+                    <label class="tag"><input type="checkbox" value="局麻"> 局麻</label>
                 </div>
 
-                <div style="font-size:0.75rem; font-weight:700; margin-top:4px;">ASA分级：</div>
-                <div class="checkbox-group" data-group="asaLevel">
-                    <label class="checkbox-tag"><input type="checkbox" value="Ⅰ级">Ⅰ级</label>
-                    <label class="checkbox-tag"><input type="checkbox" value="Ⅱ级">Ⅱ级</label>
-                    <label class="checkbox-tag"><input type="checkbox" value="Ⅲ级">Ⅲ级</label>
-                    <label class="checkbox-tag"><input type="checkbox" value="Ⅳ级">Ⅳ级</label>
-                    <label class="checkbox-tag"><input type="checkbox" value="Ⅴ级">Ⅴ级</label>
+                <div style="font-size:0.75rem; font-weight:bold;">ASA分级：</div>
+                <div class="checkbox-group" data-key="asaLevel">
+                    <label class="tag"><input type="checkbox" value="Ⅰ级"> Ⅰ级</label>
+                    <label class="tag"><input type="checkbox" value="Ⅱ级"> Ⅱ级</label>
+                    <label class="tag"><input type="checkbox" value="Ⅲ级"> Ⅲ级</label>
+                    <label class="tag"><input type="checkbox" value="Ⅳ级"> Ⅳ级</label>
+                    <label class="tag"><input type="checkbox" value="Ⅴ级"> Ⅴ级</label>
                 </div>
 
-                <div style="font-size:0.75rem; font-weight:700; margin-top:4px;">手术分级：</div>
-                <div class="checkbox-group" data-group="opLevel">
-                    <label class="checkbox-tag"><input type="checkbox" value="一级">一级</label>
-                    <label class="checkbox-tag"><input type="checkbox" value="二级">二级</label>
-                    <label class="checkbox-tag"><input type="checkbox" value="三级">三级</label>
-                    <label class="checkbox-tag"><input type="checkbox" value="四级">四级</label>
+                <div style="font-size:0.75rem; font-weight:bold;">手术分级：</div>
+                <div class="checkbox-group" data-key="opLevel">
+                    <label class="tag"><input type="checkbox" value="一级"> 一级</label>
+                    <label class="tag"><input type="checkbox" value="二级"> 二级</label>
+                    <label class="tag"><input type="checkbox" value="三级"> 三级</label>
+                    <label class="tag"><input type="checkbox" value="四级"> 四级</label>
                 </div>
             </div>
-            
-            <button class="btn btn-secondary" id="filter-btn" style="margin-top:0;">📊 按条件组合统计与计数</button>
 
-            <!-- 统计结果 -->
-            <div id="stat-result" style="margin-top: 15px; display: none;">
-                <h3 style="font-size: 0.95rem; margin-bottom: 8px; color: #007aff; text-shadow:0 1px 2px rgba(255,255,255,0.8);" id="stat-title-text">【统计结果汇总】</h3>
-                <div class="stat-grid" id="stat-grid-content"></div>
+            <button class="btn btn-purple" id="btn-filter">📊 按条件组合统计与计数</button>
+
+            <div id="stat-box" style="display:none; margin-top:10px; text-align:center; padding:10px; background:#fff; border-radius:8px;">
+                <div style="font-size:1.2rem; font-weight:bold; color:#007aff;" id="stat-count">0 次</div>
+                <div style="font-size:0.8rem; color:#666;" id="stat-title">符合条件记录数</div>
             </div>
 
-            <!-- 明细记录列表 -->
-            <h3 style="font-size: 0.95rem; margin-top: 15px; margin-bottom: 8px; text-shadow:0 1px 2px rgba(255,255,255,0.8);">【历史明细列表】</h3>
-            <div id="records-list"></div>
+            <h3 style="font-size:0.9rem; margin-top:15px; margin-bottom:8px;">【历史明细列表】</h3>
+            <div id="list-box"></div>
         </div>
     </div>
 
-    <!-- 外观与壁纸设置弹窗 -->
-    <div class="modal-mask" id="settings-modal">
-        <div class="modal-content card" style="background: rgba(255,255,255,0.95); box-shadow: 0 10px 30px rgba(0,0,0,0.3); width:100%; max-width:500px;">
+    <!-- 设置弹窗 -->
+    <div class="modal" id="modal-set">
+        <div class="card" style="width:100%; max-width:400px; background:#fff;">
             <h2>🎨 外观与透明度设置</h2>
-            
-            <div class="form-group">
-                <label>选择自定义背景照片：</label>
-                <div style="display: flex; gap: 10px;">
-                    <input type="file" id="wallpaper-upload" accept="image/*" style="display: none;">
-                    <label for="wallpaper-upload" class="btn" style="background: #34c759; margin-top:0;">📁 上传图片</label>
-                    <button id="reset-bg" class="btn btn-danger" style="display:none;">重置默认</button>
-                </div>
-            </div>
+            <label>上传背景照片：</label>
+            <input type="file" id="file-wall" accept="image/*">
 
-            <div class="form-group" style="margin-top: 15px;">
-                <label>1. 背景壁纸清晰度：</label>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="range" id="opacity-range" min="0" max="100" value="80" style="flex:1;">
-                    <span id="opacity-value" style="font-weight: 600; width: 40px;">80%</span>
-                </div>
-            </div>
+            <label>1. 背景壁纸透明度：</label>
+            <input type="range" id="range-wall" min="0" max="100" value="80">
 
-            <div class="form-group" style="margin-top: 15px;">
-                <label>2. 窗口背景透明度（0%为完全透明）：</label>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="range" id="card-opacity-range" min="0" max="100" value="20" style="flex:1;">
-                    <span id="card-opacity-value" style="font-weight: 600; width: 40px;">20%</span>
-                </div>
-            </div>
+            <label>2. 窗口卡片透明度（0%为全透明）：</label>
+            <input type="range" id="range-card" min="0" max="100" value="20">
 
-            <button class="btn" id="close-settings-btn" style="margin-top: 15px;">保存并关闭</button>
+            <button class="btn" id="btn-close-set">保存并关闭</button>
         </div>
     </div>
 
     <script>
-        // 本地数据读写
-        function getRecords() { 
-            try { return JSON.parse(localStorage.getItem('mz_data_records') || '[]'); } 
-            catch(e) { return []; }
+        // 获取数据
+        function loadData() {
+            try { return JSON.parse(localStorage.getItem('mz_data') || '[]'); } catch(e) { return []; }
         }
-        function saveRecords(data) { 
-            localStorage.setItem('mz_data_records', JSON.stringify(data)); 
+        function saveData(arr) {
+            localStorage.setItem('mz_data', JSON.stringify(arr));
         }
 
         // 渲染列表
-        function renderData(filteredList = null) {
-            const list = filteredList || getRecords();
-            const container = document.getElementById('records-list');
-            
-            if (!list || list.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:#222; font-weight:600; padding:15px; text-shadow:0 1px 2px rgba(255,255,255,0.8);">暂无数据记录</p>';
+        function render(data) {
+            const list = data || loadData();
+            const box = document.getElementById('list-box');
+            if (list.length === 0) {
+                box.innerHTML = '<p style="text-align:center; color:#888; padding:10px;">暂无数据记录</p>';
                 return;
             }
-
-            container.innerHTML = list.map((item) => `
+            box.innerHTML = list.map(item => `
                 <div class="record-item">
                     <div>
-                        <div><b>${item.deptName}</b> | 麻醉:${item.mzMethod}</div>
-                        <div style="color:#444; font-size:0.75rem; margin-top:2px;">
-                            麻醉分级:${item.mzLevel} | ASA:${item.asaLevel} | 手术:${item.opLevel}
-                        </div>
-                        <div style="color:#666; font-size:0.7rem;">${item.time}</div>
+                        <b>${item.deptName}</b> | ${item.mzMethod}<br>
+                        <span style="color:#666; font-size:0.75rem;">麻醉:${item.mzLevel} | ASA:${item.asaLevel} | 手术:${item.opLevel}</span><br>
+                        <span style="color:#999; font-size:0.7rem;">${item.time}</span>
                     </div>
-                    <button class="btn-danger" onclick="deleteItem(${item.id})">删除</button>
+                    <button class="btn btn-danger" onclick="del(${item.id})">删除</button>
                 </div>
             `).join('');
         }
 
-        // 删除单条记录
-        window.deleteItem = function(id) {
-            let list = getRecords();
-            list = list.filter(item => item.id !== id);
-            saveRecords(list);
-            renderData();
-        };
+        function del(id) {
+            let list = loadData().filter(x => x.id !== id);
+            saveData(list);
+            render();
+        }
 
-        // 动态设置窗口透明度
         function setCardOpacity(val) {
             const alpha = val / 100;
-            const blurPx = Math.round((val / 100) * 12);
-            const appCards = document.querySelectorAll('.app-card');
-
-            appCards.forEach(card => {
-                card.style.background = `rgba(255, 255, 255, ${alpha})`;
-                card.style.backdropFilter = `blur(${blurPx}px)`;
-                card.style.webkitBackdropFilter = `blur(${blurPx}px)`;
-                if (val == 0) {
-                    card.style.border = 'none';
-                    card.style.boxShadow = 'none';
-                } else {
-                    card.style.border = '1px solid rgba(255, 255, 255, 0.4)';
-                    card.style.boxShadow = '0 8px 24px rgba(0,0,0,0.1)';
-                }
+            document.querySelectorAll('.app-card').forEach(c => {
+                c.style.background = `rgba(255, 255, 255, ${alpha})`;
             });
         }
 
-        // 页面初始化
-        document.addEventListener('DOMContentLoaded', () => {
-            renderData();
+        // 绑定所有事件
+        window.onload = function() {
+            render();
 
-            const bgOverlay = document.getElementById('bg-overlay');
-            const savedBg = localStorage.getItem('app_wallpaper');
-            const savedOpacity = localStorage.getItem('app_wallpaper_opacity') || '80';
-            const savedCardOpacity = localStorage.getItem('app_card_opacity') || '20';
-
-            if (savedBg) { 
-                bgOverlay.style.backgroundImage = `url(${savedBg})`; 
-                document.getElementById('reset-bg').style.display = 'inline-block'; 
-            }
-            
-            document.getElementById('opacity-range').value = savedOpacity;
-            document.getElementById('opacity-value').textContent = savedOpacity + '%';
-            bgOverlay.style.opacity = savedOpacity / 100;
-
-            document.getElementById('card-opacity-range').value = savedCardOpacity;
-            document.getElementById('card-opacity-value').textContent = savedCardOpacity + '%';
-            setCardOpacity(savedCardOpacity);
-
-            // 表单提交（保存）
-            document.getElementById('data-form').addEventListener('submit', (e) => {
-                e.preventDefault();
+            // 保存按钮
+            document.getElementById('btn-save').onclick = function() {
                 const now = new Date();
-                const record = {
+                const item = {
                     id: Date.now(),
                     date: now.toISOString().split('T')[0],
                     time: now.toLocaleString(),
@@ -385,49 +234,67 @@
                     asaLevel: document.getElementById('asa-level').value,
                     opLevel: document.getElementById('op-level').value
                 };
-
-                const list = getRecords();
-                list.unshift(record);
-                saveRecords(list);
+                const list = loadData();
+                list.unshift(item);
+                saveData(list);
                 alert('保存成功！');
-                renderData();
-            });
+                render();
+            };
 
-            // 统计与过滤按钮
-            document.getElementById('filter-btn').addEventListener('click', () => {
-                const start = document.getElementById('start-date').value;
-                const end = document.getElementById('end-date').value;
-                let list = getRecords();
+            // 统计筛选按钮
+            document.getElementById('btn-filter').onclick = function() {
+                let list = loadData();
+                const s = document.getElementById('start-date').value;
+                const e = document.getElementById('end-date').value;
 
-                if (start) list = list.filter(item => item.date >= start);
-                if (end) list = list.filter(item => item.date <= end);
+                if (s) list = list.filter(x => x.date >= s);
+                if (e) list = list.filter(x => x.date <= e);
 
-                const selectedConditions = {};
+                const conds = {};
                 document.querySelectorAll('.checkbox-group').forEach(group => {
-                    const groupKey = group.getAttribute('data-group');
-                    const checkedValues = Array.from(group.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
-                    if (checkedValues.length > 0) {
-                        selectedConditions[groupKey] = checkedValues;
-                    }
+                    const key = group.getAttribute('data-key');
+                    const checked = Array.from(group.querySelectorAll('input:checked')).map(c => c.value);
+                    if (checked.length > 0) conds[key] = checked;
                 });
 
-                const activeKeys = Object.keys(selectedConditions);
+                const activeKeys = Object.keys(conds);
                 if (activeKeys.length > 0) {
                     list = list.filter(item => {
-                        return activeKeys.every(key => {
-                            return selectedConditions[key].includes(item[key]);
-                        });
+                        return activeKeys.every(k => conds[k].includes(item[k]));
                     });
                 }
 
-                renderData(list);
+                render(list);
+                document.getElementById('stat-count').innerText = list.length + ' 次';
+                document.getElementById('stat-box').style.display = 'block';
+            };
 
-                let summaryText = '【组合条件筛选结果】';
-                if (activeKeys.length > 0) {
-                    const descList = [];
-                    activeKeys.forEach(k => descList.push(selectedConditions[k].join(',')));
-                    summaryText = `【组合统计：${descList.join(' 且 ')}】`;
+            // 弹窗控制
+            document.getElementById('btn-open-set').onclick = function() {
+                document.getElementById('modal-set').classList.add('active');
+            };
+            document.getElementById('btn-close-set').onclick = function() {
+                document.getElementById('modal-set').classList.remove('active');
+            };
+
+            // 外观与透明度
+            document.getElementById('range-card').oninput = function(e) {
+                setCardOpacity(e.target.value);
+            };
+            document.getElementById('range-wall').oninput = function(e) {
+                document.getElementById('bg-overlay').style.opacity = e.target.value / 100;
+            };
+            document.getElementById('file-wall').onchange = function(e) {
+                const f = e.target.files[0];
+                if (f) {
+                    const r = new FileReader();
+                    r.onload = function(evt) {
+                        document.getElementById('bg-overlay').style.backgroundImage = 'url(' + evt.target.result + ')';
+                    };
+                    r.readAsDataURL(f);
                 }
-                document.getElementById('stat-title-text').textContent = summaryText;
-
-                document.getElementById('stat-grid-content').innerHTML = `
+            };
+        };
+    </script>
+</body>
+</html>
