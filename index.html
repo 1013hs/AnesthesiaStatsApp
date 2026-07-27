@@ -45,8 +45,6 @@
             cursor: pointer; margin-top: 8px; text-align: center; display: inline-block; text-decoration: none;
         }
         .btn-purple { background: #5856d6; }
-        .btn-green { background: #34c759; }
-        .btn-orange { background: #ff9500; }
         .btn-danger { background: #ff3b30; width: auto; padding: 4px 8px; font-size: 0.8rem; }
         
         .quick-date-bar { display: flex; gap: 4px; margin-bottom: 8px; }
@@ -80,7 +78,7 @@
 
     <div class="navbar">
         <b>💉 麻醉统计系统</b>
-        <button id="btn-open-set" style="background:none; border:none; color:#007aff; font-weight:bold; cursor:pointer;">⚙️ 外观与备份</button>
+        <button id="btn-open-set" style="background:none; border:none; color:#007aff; font-weight:bold; cursor:pointer;">⚙️ 外观设置</button>
     </div>
 
     <div class="container">
@@ -171,7 +169,6 @@
             </div>
 
             <button class="btn btn-purple" id="btn-filter">📊 按条件组合统计与计数</button>
-            <button class="btn btn-green" id="btn-export" style="margin-top:6px;">📥 导出当前结果为 Excel (CSV)</button>
 
             <div id="stat-box" style="display:none; margin-top:10px; padding:12px; background:rgba(255,255,255,0.9); border-radius:8px;">
                 <div style="font-size:1.1rem; font-weight:bold; color:#007aff; text-align:center;" id="stat-count">0 次</div>
@@ -184,10 +181,10 @@
         </div>
     </div>
 
-    <!-- 设置与备份弹窗 -->
+    <!-- 外观设置弹窗 -->
     <div class="modal" id="modal-set">
         <div class="card" style="width:100%; max-width:400px; background:#fff; margin-bottom:0; max-height:90vh; overflow-y:auto;">
-            <h2>🎨 外观、透明度与数据备份</h2>
+            <h2>🎨 外观与透明度设置</h2>
             
             <label style="color:#1c1c1e;">上传背景照片：</label>
             <input type="file" id="file-wall" accept="image/*">
@@ -198,15 +195,7 @@
             <label style="color:#1c1c1e;">2. 窗口卡片透明度（0%为全透明）：</label>
             <input type="range" id="range-card" min="0" max="100" value="20">
 
-            <div style="border-top:1px solid #ddd; margin-top:15px; padding-top:10px;">
-                <label style="color:#007aff;">📦 数据安全与备份：</label>
-                <button class="btn btn-orange" id="btn-backup" style="margin-top:4px;">📤 导出完整数据备份 (JSON)</button>
-                
-                <input type="file" id="file-import" accept=".json" style="display:none;">
-                <label for="file-import" class="btn btn-purple" style="margin-top:6px; text-align:center; cursor:pointer;">📥 导入恢复数据备份</label>
-            </div>
-
-            <button class="btn" id="btn-close-set" style="margin-top:15px;">保存并关闭</button>
+            <button class="btn" id="btn-close-set" style="margin-top:20px;">保存并关闭</button>
         </div>
     </div>
 
@@ -314,42 +303,6 @@
             });
         }
 
-        // 核心：生成文件并弹出系统保存/分享菜单
-        async function generateAndShareFile(content, filename, contentType) {
-            const blob = new Blob([content], { type: contentType });
-            const file = new File([blob], filename, { type: contentType });
-
-            // 优先调用系统的原生分享/保存弹窗（支持 Android WebApp / 手机浏览器）
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                try {
-                    await navigator.share({
-                        files: [file],
-                        title: filename,
-                        text: '请选择保存或发送导出的文件'
-                    });
-                    return;
-                } catch (err) {
-                    if (err.name !== 'AbortError') {
-                        console.log('Share error:', err);
-                    } else {
-                        return; // 用户取消分享
-                    }
-                }
-            }
-
-            // 降级兼容方案：标准自动下载
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            }, 100);
-        }
-
         window.onload = function() {
             render();
 
@@ -419,53 +372,6 @@
                     chartBox.innerHTML = chartHtml;
                 }
                 document.getElementById('stat-box').style.display = 'block';
-            };
-
-            // 📥 导出当前结果为 Excel (CSV)
-            document.getElementById('btn-export').onclick = async function() {
-                const list = getFilteredList();
-                if (list.length === 0) { alert('当前没有可导出的数据！'); return; }
-                
-                let csv = '\uFEFF记录ID,日期时间,麻醉分级,科室名称,麻醉方式,ASA分级,手术分级\n';
-                list.forEach(i => {
-                    csv += `${i.id},"${i.time}","${i.mzLevel}","${i.deptName}","${i.mzMethod}","${i.asaLevel}","${i.opLevel}"\n`;
-                });
-
-                const filename = `麻醉统计数据_${new Date().toISOString().split('T')[0]}.csv`;
-                await generateAndShareFile(csv, filename, 'text/csv;charset=utf-8;');
-            };
-
-            // 📦 导出完整数据备份 (JSON)
-            document.getElementById('btn-backup').onclick = async function() {
-                const data = loadData();
-                if (data.length === 0) { alert('当前没有任何备份数据！'); return; }
-                
-                const dataStr = JSON.stringify(data, null, 2);
-                const filename = `麻醉系统备份_${new Date().toISOString().split('T')[0]}.json`;
-                await generateAndShareFile(dataStr, filename, 'application/json');
-            };
-
-            // 📥 导入恢复数据 (JSON)
-            document.getElementById('file-import').onchange = function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(evt) {
-                        try {
-                            const importedData = JSON.parse(evt.target.result);
-                            if (Array.isArray(importedData)) {
-                                saveData(importedData);
-                                render();
-                                alert('数据导入恢复成功！');
-                            } else {
-                                alert('备份文件格式错误！');
-                            }
-                        } catch(err) {
-                            alert('解析备份文件失败！');
-                        }
-                    };
-                    reader.readAsText(file);
-                }
             };
 
             // 弹窗控制
