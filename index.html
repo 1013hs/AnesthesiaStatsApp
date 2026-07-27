@@ -314,9 +314,30 @@
             });
         }
 
-        // 通用直接下载文件函数
-        function downloadFile(content, filename, contentType) {
+        // 核心：生成文件并弹出系统保存/分享菜单
+        async function generateAndShareFile(content, filename, contentType) {
             const blob = new Blob([content], { type: contentType });
+            const file = new File([blob], filename, { type: contentType });
+
+            // 优先调用系统的原生分享/保存弹窗（支持 Android WebApp / 手机浏览器）
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: filename,
+                        text: '请选择保存或发送导出的文件'
+                    });
+                    return;
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        console.log('Share error:', err);
+                    } else {
+                        return; // 用户取消分享
+                    }
+                }
+            }
+
+            // 降级兼容方案：标准自动下载
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -400,8 +421,8 @@
                 document.getElementById('stat-box').style.display = 'block';
             };
 
-            // 📥 直接下载 CSV 文件
-            document.getElementById('btn-export').onclick = function() {
+            // 📥 导出当前结果为 Excel (CSV)
+            document.getElementById('btn-export').onclick = async function() {
                 const list = getFilteredList();
                 if (list.length === 0) { alert('当前没有可导出的数据！'); return; }
                 
@@ -411,17 +432,17 @@
                 });
 
                 const filename = `麻醉统计数据_${new Date().toISOString().split('T')[0]}.csv`;
-                downloadFile(csv, filename, 'text/csv;charset=utf-8;');
+                await generateAndShareFile(csv, filename, 'text/csv;charset=utf-8;');
             };
 
-            // 📦 直接下载 JSON 备份文件
-            document.getElementById('btn-backup').onclick = function() {
+            // 📦 导出完整数据备份 (JSON)
+            document.getElementById('btn-backup').onclick = async function() {
                 const data = loadData();
                 if (data.length === 0) { alert('当前没有任何备份数据！'); return; }
                 
                 const dataStr = JSON.stringify(data, null, 2);
                 const filename = `麻醉系统备份_${new Date().toISOString().split('T')[0]}.json`;
-                downloadFile(dataStr, filename, 'application/json');
+                await generateAndShareFile(dataStr, filename, 'application/json');
             };
 
             // 📥 导入恢复数据 (JSON)
