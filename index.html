@@ -42,16 +42,32 @@
         .btn {
             background: #007aff; color: #fff; border: none; padding: 12px;
             border-radius: 8px; width: 100%; font-size: 1rem; font-weight: bold;
-            cursor: pointer; margin-top: 8px;
+            cursor: pointer; margin-top: 8px; text-align: center; display: inline-block; text-decoration: none;
         }
         .btn-purple { background: #5856d6; }
+        .btn-green { background: #34c759; }
+        .btn-orange { background: #ff9500; }
         .btn-danger { background: #ff3b30; width: auto; padding: 4px 8px; font-size: 0.8rem; }
+        
+        .quick-date-bar { display: flex; gap: 4px; margin-bottom: 8px; }
+        .quick-date-bar button {
+            flex: 1; background: rgba(0,122,255,0.1); border: 1px solid rgba(0,122,255,0.3);
+            color: #007aff; font-size: 0.75rem; font-weight: bold; padding: 6px 0; border-radius: 6px; cursor: pointer;
+        }
+
         .checkbox-group { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
         .tag { background: #fff; padding: 6px 10px; border-radius: 6px; border: 1px solid #ddd; font-size: 0.8rem; }
+        
         .record-item {
             background: #fff; padding: 10px; border-radius: 8px; margin-bottom: 8px;
             display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;
         }
+
+        /* 进度条样式 */
+        .chart-bar-item { margin-bottom: 6px; font-size: 0.75rem; }
+        .chart-bar-bg { background: rgba(0,0,0,0.1); border-radius: 4px; height: 8px; width: 100%; margin-top: 2px; overflow: hidden; }
+        .chart-bar-fill { background: #007aff; height: 100%; border-radius: 4px; transition: width 0.3s; }
+
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; padding: 20px;
@@ -65,7 +81,7 @@
 
     <div class="navbar">
         <b>💉 麻醉统计系统</b>
-        <button id="btn-open-set" style="background:none; border:none; color:#007aff; font-weight:bold; cursor:pointer;">⚙️ 外观设置</button>
+        <button id="btn-open-set" style="background:none; border:none; color:#007aff; font-weight:bold; cursor:pointer;">⚙️ 外观与备份</button>
     </div>
 
     <div class="container">
@@ -97,6 +113,14 @@
         <div class="card app-card">
             <h2>📅 历史记录与统计</h2>
             
+            <!-- 新增：快捷时间按钮 -->
+            <div class="quick-date-bar">
+                <button onclick="setQuickDate('today')">今天</button>
+                <button onclick="setQuickDate('week')">本周</button>
+                <button onclick="setQuickDate('month')">本月</button>
+                <button onclick="setQuickDate('all')">全部</button>
+            </div>
+
             <div style="display:flex; gap:8px;">
                 <div style="flex:1;"><label>开始日期</label><input type="date" id="start-date"></div>
                 <div style="flex:1;"><label>结束日期</label><input type="date" id="end-date"></div>
@@ -149,10 +173,13 @@
             </div>
 
             <button class="btn btn-purple" id="btn-filter">📊 按条件组合统计与计数</button>
+            <button class="btn btn-green" id="btn-export" style="margin-top:6px;">📥 导出当前结果为 Excel (CSV)</button>
 
-            <div id="stat-box" style="display:none; margin-top:10px; text-align:center; padding:10px; background:rgba(255,255,255,0.9); border-radius:8px;">
-                <div style="font-size:1.2rem; font-weight:bold; color:#007aff;" id="stat-count">0 次</div>
-                <div style="font-size:0.8rem; color:#666;" id="stat-title">符合条件记录数</div>
+            <!-- 统计结果与图表展示 -->
+            <div id="stat-box" style="display:none; margin-top:10px; padding:12px; background:rgba(255,255,255,0.9); border-radius:8px;">
+                <div style="font-size:1.1rem; font-weight:bold; color:#007aff; text-align:center;" id="stat-count">0 次</div>
+                <div style="font-size:0.75rem; color:#666; text-align:center; margin-bottom:8px;">符合条件的记录总数</div>
+                <div id="chart-container" style="border-top:1px solid #eee; padding-top:8px;"></div>
             </div>
 
             <h3 style="font-size:0.9rem; margin-top:15px; margin-bottom:8px;">【历史明细列表】</h3>
@@ -160,10 +187,11 @@
         </div>
     </div>
 
-    <!-- 设置弹窗 -->
+    <!-- 设置与备份弹窗 -->
     <div class="modal" id="modal-set">
-        <div class="card" style="width:100%; max-width:400px; background:#fff; margin-bottom:0;">
-            <h2>🎨 外观与透明度设置</h2>
+        <div class="card" style="width:100%; max-width:400px; background:#fff; margin-bottom:0; max-height:90vh; overflow-y:auto;">
+            <h2>🎨 外观、透明度与数据备份</h2>
+            
             <label style="color:#1c1c1e;">上传背景照片：</label>
             <input type="file" id="file-wall" accept="image/*">
 
@@ -173,7 +201,15 @@
             <label style="color:#1c1c1e;">2. 窗口卡片透明度（0%为全透明）：</label>
             <input type="range" id="range-card" min="0" max="100" value="20">
 
-            <button class="btn" id="btn-close-set">保存并关闭</button>
+            <div style="border-top:1px solid #ddd; margin-top:15px; padding-top:10px;">
+                <label style="color:#007aff;">📦 数据安全与备份：</label>
+                <button class="btn btn-orange" id="btn-backup" style="margin-top:4px;">📤 导出完整数据备份 (JSON)</button>
+                
+                <input type="file" id="file-import" accept=".json" style="display:none;">
+                <label for="file-import" class="btn btn-purple" style="margin-top:6px; text-align:center; cursor:pointer;">📥 导入恢复数据备份</label>
+            </div>
+
+            <button class="btn" id="btn-close-set" style="margin-top:15px;">保存并关闭</button>
         </div>
     </div>
 
@@ -183,6 +219,60 @@
         }
         function saveData(arr) {
             localStorage.setItem('mz_data', JSON.stringify(arr));
+        }
+
+        // 快捷日期设定
+        window.setQuickDate = function(type) {
+            const now = new Date();
+            const startInput = document.getElementById('start-date');
+            const endInput = document.getElementById('end-date');
+            let start = '', end = '';
+
+            const formatDate = (d) => d.toISOString().split('T')[0];
+
+            if (type === 'today') {
+                start = end = formatDate(now);
+            } else if (type === 'week') {
+                const day = now.getDay() || 7;
+                const monday = new Date(now);
+                monday.setDate(now.getDate() - day + 1);
+                start = formatDate(monday);
+                end = formatDate(now);
+            } else if (type === 'month') {
+                const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+                start = formatDate(firstDay);
+                end = formatDate(now);
+            } else if (type === 'all') {
+                start = '';
+                end = '';
+            }
+            startInput.value = start;
+            endInput.value = end;
+            document.getElementById('btn-filter').click();
+        };
+
+        function getFilteredList() {
+            let list = loadData();
+            const s = document.getElementById('start-date').value;
+            const e = document.getElementById('end-date').value;
+
+            if (s) list = list.filter(x => x.date >= s);
+            if (e) list = list.filter(x => x.date <= e);
+
+            const conds = {};
+            document.querySelectorAll('.checkbox-group').forEach(group => {
+                const key = group.getAttribute('data-key');
+                const checked = Array.from(group.querySelectorAll('input:checked')).map(c => c.value);
+                if (checked.length > 0) conds[key] = checked;
+            });
+
+            const activeKeys = Object.keys(conds);
+            if (activeKeys.length > 0) {
+                list = list.filter(item => {
+                    return activeKeys.every(k => conds[k].includes(item[k]));
+                });
+            }
+            return list;
         }
 
         function render(data) {
@@ -204,13 +294,13 @@
             `).join('');
         }
 
-        function del(id) {
+        window.del = function(id) {
             let list = loadData().filter(x => x.id !== id);
             saveData(list);
             render();
-        }
+            document.getElementById('btn-filter').click();
+        };
 
-        // 关键改动：支持 0% 纯透明
         function setCardOpacity(val) {
             const alpha = val / 100;
             const blurPx = Math.round((val / 100) * 10);
@@ -231,7 +321,6 @@
         window.onload = function() {
             render();
 
-            // 读取保存的透明度偏好
             const savedCardAlpha = localStorage.getItem('mz_card_alpha');
             if (savedCardAlpha !== null) {
                 document.getElementById('range-card').value = savedCardAlpha;
@@ -251,7 +340,7 @@
                 document.getElementById('bg-overlay').style.backgroundImage = 'url(' + savedBgImg + ')';
             }
 
-            // 保存按钮
+            // 保存录入
             document.getElementById('btn-save').onclick = function() {
                 const now = new Date();
                 const item = {
@@ -271,32 +360,90 @@
                 render();
             };
 
-            // 统计筛选按钮
+            // 统计筛选与图表绘制
             document.getElementById('btn-filter').onclick = function() {
-                let list = loadData();
-                const s = document.getElementById('start-date').value;
-                const e = document.getElementById('end-date').value;
+                const list = getFilteredList();
+                render(list);
 
-                if (s) list = list.filter(x => x.date >= s);
-                if (e) list = list.filter(x => x.date <= e);
+                document.getElementById('stat-count').innerText = list.length + ' 次';
+                
+                // 绘制麻醉方式占比简易图表
+                const chartBox = document.getElementById('chart-container');
+                if (list.length === 0) {
+                    chartBox.innerHTML = '<div style="font-size:0.75rem; color:#666; text-align:center;">暂无数据参与占比分析</div>';
+                } else {
+                    const stats = {};
+                    list.forEach(i => { stats[i.mzMethod] = (stats[i.mzMethod] || 0) + 1; });
+                    let chartHtml = '<div style="font-size:0.75rem; font-weight:bold; margin-bottom:4px;">麻醉方式占比分析：</div>';
+                    for (let method in stats) {
+                        const count = stats[method];
+                        const percent = ((count / list.length) * 100).toFixed(1);
+                        chartHtml += `
+                            <div class="chart-bar-item">
+                                <div style="display:flex; justify-content:space-between;"><span>${method}</span><span>${count}次 (${percent}%)</span></div>
+                                <div class="chart-bar-bg"><div class="chart-bar-fill" style="width: ${percent}%;"></div></div>
+                            </div>
+                        `;
+                    }
+                    chartBox.innerHTML = chartHtml;
+                }
+                document.getElementById('stat-box').style.display = 'block';
+            };
 
-                const conds = {};
-                document.querySelectorAll('.checkbox-group').forEach(group => {
-                    const key = group.getAttribute('data-key');
-                    const checked = Array.from(group.querySelectorAll('input:checked')).map(c => c.value);
-                    if (checked.length > 0) conds[key] = checked;
+            // 📥 导出 Excel (CSV)
+            document.getElementById('btn-export').onclick = function() {
+                const list = getFilteredList();
+                if (list.length === 0) { alert('当前没有可导出的数据！'); return; }
+                
+                let csv = '\uFEFF记录ID,日期时间,麻醉分级,科室名称,麻醉方式,ASA分级,手术分级\n';
+                list.forEach(i => {
+                    csv += `${i.id},"${i.time}","${i.mzLevel}","${i.deptName}","${i.mzMethod}","${i.asaLevel}","${i.opLevel}"\n`;
                 });
 
-                const activeKeys = Object.keys(conds);
-                if (activeKeys.length > 0) {
-                    list = list.filter(item => {
-                        return activeKeys.every(k => conds[k].includes(item[k]));
-                    });
-                }
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `麻醉统计数据_${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
 
-                render(list);
-                document.getElementById('stat-count').innerText = list.length + ' 次';
-                document.getElementById('stat-box').style.display = 'block';
+            // 📦 导出完整备份 (JSON)
+            document.getElementById('btn-backup').onclick = function() {
+                const dataStr = JSON.stringify(loadData(), null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `麻醉系统备份_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+
+            // 📥 导入恢复数据 (JSON)
+            document.getElementById('file-import').onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        try {
+                            const importedData = JSON.parse(evt.target.result);
+                            if (Array.isArray(importedData)) {
+                                saveData(importedData);
+                                render();
+                                alert('数据导入恢复成功！');
+                            } else {
+                                alert('备份文件格式错误！');
+                            }
+                        } catch(err) {
+                            alert('解析备份文件失败！');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
             };
 
             // 弹窗控制
