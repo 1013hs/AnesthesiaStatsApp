@@ -70,6 +70,21 @@
             background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; padding: 20px;
         }
         .modal.active { display: flex; }
+
+        /* 萌宠小锦鲤样式 */
+        .pet-badge {
+            background: rgba(0, 122, 255, 0.1);
+            border: 1px solid rgba(0, 122, 255, 0.3);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: #007aff;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -77,7 +92,14 @@
     <div id="bg-overlay"></div>
 
     <div class="navbar">
-        <b>💉 麻醉统计系统</b>
+        <div style="display:flex; align-items:center; gap:8px;">
+            <b>💉 麻醉统计系统</b>
+            <!-- 临床小锦鲤挂件 -->
+            <div class="pet-badge" id="pet-widget" onclick="petClick()">
+                <span id="pet-icon">💤</span>
+                <span id="pet-text">养神中</span>
+            </div>
+        </div>
         <button id="btn-open-set" style="background:none; border:none; color:#007aff; font-weight:bold; cursor:pointer;">⚙️ 外观设置</button>
     </div>
 
@@ -205,7 +227,45 @@
         }
         function saveData(arr) {
             localStorage.setItem('mz_data', JSON.stringify(arr));
+            updatePetStatus();
         }
+
+        // 更新小锦鲤状态
+        function updatePetStatus() {
+            const list = loadData();
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayCount = list.filter(x => x.date === todayStr).length;
+
+            const iconEl = document.getElementById('pet-icon');
+            const textEl = document.getElementById('pet-text');
+
+            if (todayCount === 0) {
+                iconEl.innerText = '💤';
+                textEl.innerText = '养神中';
+            } else if (todayCount < 5) {
+                iconEl.innerText = '🏃';
+                textEl.innerText = `冲刺(${todayCount}例)`;
+            } else {
+                iconEl.innerText = '✨';
+                textEl.innerText = `全场MVP(${todayCount}例)`;
+            }
+        }
+
+        // 点击小锦鲤互动彩蛋
+        window.petClick = function() {
+            const list = loadData();
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayCount = list.filter(x => x.date === todayStr).length;
+            
+            const msgs = [
+                "小锦鲤提醒您：今天也要顺顺利利、平安拔管哦！",
+                "监护仪波形平稳，心情美滋滋！",
+                `今日已记录 ${todayCount} 台病例，继续加油，注意劳逸结合！`,
+                "困难气道退散！今天全是顺风局~"
+            ];
+            const randomMsg = msgs[Math.floor(Math.random() * msgs.length)];
+            alert(randomMsg);
+        };
 
         window.setQuickDate = function(type) {
             const now = new Date();
@@ -305,6 +365,7 @@
 
         window.onload = function() {
             render();
+            updatePetStatus();
 
             const savedCardAlpha = localStorage.getItem('mz_card_alpha');
             if (savedCardAlpha !== null) {
@@ -375,7 +436,7 @@
             };
 
             // 弹窗控制
-            document.getElementById('btn-open-set').onclick = function() {
+         document.getElementById('btn-open-set').onclick = function() {
                 document.getElementById('modal-set').classList.add('active');
             };
             document.getElementById('btn-close-set').onclick = function() {
