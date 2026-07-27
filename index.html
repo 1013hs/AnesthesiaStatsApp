@@ -71,11 +71,21 @@
         }
         .modal.active { display: flex; }
 
-        /* 萌宠小锦鲤样式 */
+        /* 临床小锦鲤动画样式 */
+        @keyframes koiSwim {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-2px) rotate(-3deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        @keyframes starGlow {
+            0% { opacity: 0.4; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 0.4; transform: scale(0.9); }
+        }
         .pet-badge {
-            background: rgba(0, 122, 255, 0.1);
+            background: rgba(255, 255, 255, 0.9);
             border: 1px solid rgba(0, 122, 255, 0.3);
-            padding: 2px 8px;
+            padding: 3px 8px;
             border-radius: 12px;
             font-size: 0.75rem;
             color: #007aff;
@@ -84,6 +94,15 @@
             align-items: center;
             gap: 4px;
             cursor: pointer;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+        .koi-icon {
+            display: inline-block;
+            animation: koiSwim 1.5s ease-in-out infinite;
+        }
+        .koi-star {
+            display: inline-block;
+            animation: starGlow 0.8s ease-in-out infinite;
         }
     </style>
 </head>
@@ -94,10 +113,9 @@
     <div class="navbar">
         <div style="display:flex; align-items:center; gap:8px;">
             <b>💉 麻醉统计系统</b>
-            <!-- 临床小锦鲤挂件 -->
-            <div class="pet-badge" id="pet-widget" onclick="petClick()">
-                <span id="pet-icon">💤</span>
-                <span id="pet-text">养神中</span>
+            <!-- 临床小锦鲤动态画面组件 -->
+            <div class="pet-badge" id="pet-widget" onclick="updatePetStatus()" title="点击刷新锦鲤状态">
+                <span id="pet-view"><span class="koi-icon">🐟</span> 💤 沉睡中</span>
             </div>
         </div>
         <button id="btn-open-set" style="background:none; border:none; color:#007aff; font-weight:bold; cursor:pointer;">⚙️ 外观设置</button>
@@ -230,41 +248,21 @@
             updatePetStatus();
         }
 
-        // 更新小锦鲤状态
-        function updatePetStatus() {
+        // 更新小锦鲤动态画面
+        window.updatePetStatus = function() {
             const list = loadData();
             const todayStr = new Date().toISOString().split('T')[0];
             const todayCount = list.filter(x => x.date === todayStr).length;
 
-            const iconEl = document.getElementById('pet-icon');
-            const textEl = document.getElementById('pet-text');
+            const viewEl = document.getElementById('pet-view');
 
             if (todayCount === 0) {
-                iconEl.innerText = '💤';
-                textEl.innerText = '养神中';
+                viewEl.innerHTML = '<span class="koi-icon">🐟</span> 💤 沉睡中';
             } else if (todayCount < 5) {
-                iconEl.innerText = '🏃';
-                textEl.innerText = `冲刺(${todayCount}例)`;
+                viewEl.innerHTML = `<span class="koi-icon">🐟</span> 🏃 摆尾中(${todayCount})`;
             } else {
-                iconEl.innerText = '✨';
-                textEl.innerText = `全场MVP(${todayCount}例)`;
+                viewEl.innerHTML = `<span class="koi-star">✨</span><span class="koi-icon">🐟</span> 🌟 护体(${todayCount})`;
             }
-        }
-
-        // 点击小锦鲤互动彩蛋
-        window.petClick = function() {
-            const list = loadData();
-            const todayStr = new Date().toISOString().split('T')[0];
-            const todayCount = list.filter(x => x.date === todayStr).length;
-            
-            const msgs = [
-                "小锦鲤提醒您：今天也要顺顺利利、平安拔管哦！",
-                "监护仪波形平稳，心情美滋滋！",
-                `今日已记录 ${todayCount} 台病例，继续加油，注意劳逸结合！`,
-                "困难气道退散！今天全是顺风局~"
-            ];
-            const randomMsg = msgs[Math.floor(Math.random() * msgs.length)];
-            alert(randomMsg);
         };
 
         window.setQuickDate = function(type) {
@@ -431,12 +429,12 @@
                         `;
                     }
                     chartBox.innerHTML = chartHtml;
-                }
+         }
                 document.getElementById('stat-box').style.display = 'block';
             };
 
             // 弹窗控制
-         document.getElementById('btn-open-set').onclick = function() {
+            document.getElementById('btn-open-set').onclick = function() {
                 document.getElementById('modal-set').classList.add('active');
             };
             document.getElementById('btn-close-set').onclick = function() {
