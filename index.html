@@ -63,7 +63,6 @@
             display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;
         }
 
-        /* 进度条样式 */
         .chart-bar-item { margin-bottom: 6px; font-size: 0.75rem; }
         .chart-bar-bg { background: rgba(0,0,0,0.1); border-radius: 4px; height: 8px; width: 100%; margin-top: 2px; overflow: hidden; }
         .chart-bar-fill { background: #007aff; height: 100%; border-radius: 4px; transition: width 0.3s; }
@@ -113,7 +112,6 @@
         <div class="card app-card">
             <h2>📅 历史记录与统计</h2>
             
-            <!-- 新增：快捷时间按钮 -->
             <div class="quick-date-bar">
                 <button onclick="setQuickDate('today')">今天</button>
                 <button onclick="setQuickDate('week')">本周</button>
@@ -175,7 +173,6 @@
             <button class="btn btn-purple" id="btn-filter">📊 按条件组合统计与计数</button>
             <button class="btn btn-green" id="btn-export" style="margin-top:6px;">📥 导出当前结果为 Excel (CSV)</button>
 
-            <!-- 统计结果与图表展示 -->
             <div id="stat-box" style="display:none; margin-top:10px; padding:12px; background:rgba(255,255,255,0.9); border-radius:8px;">
                 <div style="font-size:1.1rem; font-weight:bold; color:#007aff; text-align:center;" id="stat-count">0 次</div>
                 <div style="font-size:0.75rem; color:#666; text-align:center; margin-bottom:8px;">符合条件的记录总数</div>
@@ -213,6 +210,16 @@
         </div>
     </div>
 
+    <!-- 弹窗展示生成的内容（用于App内直接复制或下载） -->
+    <div class="modal" id="modal-output">
+        <div class="card" style="width:100%; max-width:500px; background:#fff;">
+            <h2 id="output-title">文件生成成功</h2>
+            <p style="font-size:0.8rem; color:#666; margin-bottom:8px;">在安卓端若无法自动下载，请长按下方文本框全选并复制，或点击保存：</p>
+            <textarea id="output-text" style="width:100%; height:150px; font-size:0.75rem; padding:8px; border-radius:6px; border:1px solid #ccc;"></textarea>
+            <button class="btn" id="btn-close-output" style="margin-top:10px;">关闭窗口</button>
+        </div>
+    </div>
+
     <script>
         function loadData() {
             try { return JSON.parse(localStorage.getItem('mz_data') || '[]'); } catch(e) { return []; }
@@ -221,7 +228,6 @@
             localStorage.setItem('mz_data', JSON.stringify(arr));
         }
 
-        // 快捷日期设定
         window.setQuickDate = function(type) {
             const now = new Date();
             const startInput = document.getElementById('start-date');
@@ -360,14 +366,13 @@
                 render();
             };
 
-            // 统计筛选与图表绘制
+            // 统计筛选
             document.getElementById('btn-filter').onclick = function() {
                 const list = getFilteredList();
                 render(list);
 
                 document.getElementById('stat-count').innerText = list.length + ' 次';
                 
-                // 绘制麻醉方式占比简易图表
                 const chartBox = document.getElementById('chart-container');
                 if (list.length === 0) {
                     chartBox.innerHTML = '<div style="font-size:0.75rem; color:#666; text-align:center;">暂无数据参与占比分析</div>';
@@ -390,7 +395,7 @@
                 document.getElementById('stat-box').style.display = 'block';
             };
 
-            // 📥 导出 Excel (CSV)
+            // 📥 修复：导出当前结果为 Excel (CSV) —— 适配安卓 WebView 弹窗查看与保存
             document.getElementById('btn-export').onclick = function() {
                 const list = getFilteredList();
                 if (list.length === 0) { alert('当前没有可导出的数据！'); return; }
@@ -400,27 +405,48 @@
                     csv += `${i.id},"${i.time}","${i.mzLevel}","${i.deptName}","${i.mzMethod}","${i.asaLevel}","${i.opLevel}"\n`;
                 });
 
-                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `麻醉统计数据_${new Date().toISOString().split('T')[0]}.csv`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                // 同时尝试常规下载和弹出文本框双保险
+                try {
+                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `麻醉统计数据_${new Date().toISOString().split('T')[0]}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                } catch(e) {}
+
+                // 弹出文本框确保安卓端绝对能拿到数据
+                document.getElementById('output-title').innerText = '📥 CSV 表格数据导出成功';
+                document.getElementById('output-text').value = csv;
+                document.getElementById('modal-output').classList.add('active');
             };
 
-            // 📦 导出完整备份 (JSON)
+            // 📦 修复：导出完整数据备份 (JSON) —— 适配安卓 WebView 弹窗查看与保存
             document.getElementById('btn-backup').onclick = function() {
                 const dataStr = JSON.stringify(loadData(), null, 2);
-                const blob = new Blob([dataStr], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `麻醉系统备份_${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                if (loadData().length === 0) { alert('当前没有任何备份数据！'); return; }
+
+                try {
+                    const blob = new Blob([dataStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `麻醉系统备份_${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                } catch(e) {}
+
+                document.getElementById('output-title').innerText = '📦 完整数据备份 (JSON) 成功';
+                document.getElementById('output-text').value = dataStr;
+                document.getElementById('modal-output').classList.add('active');
+            };
+
+            // 关闭输出弹窗
+            document.getElementById('btn-close-output').onclick = function() {
+                document.getElementById('modal-output').classList.remove('active');
             };
 
             // 📥 导入恢复数据 (JSON)
