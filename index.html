@@ -340,8 +340,13 @@
         window.del = function(id) {
             let list = loadData().filter(x => x.id !== id);
             saveData(list);
+            
+            // ✅ 正确刷新列表，同时如果处于统计筛选面板开启状态，则顺带同步局部更新
             render();
-            document.getElementById('btn-filter').click();
+            const statBox = document.getElementById('stat-box');
+            if (statBox.style.display === 'block') {
+                document.getElementById('btn-filter').click();
+            }
         };
 
         function setCardOpacity(val) {
@@ -429,7 +434,7 @@
                         `;
                     }
                     chartBox.innerHTML = chartHtml;
-         }
+                }
                 document.getElementById('stat-box').style.display = 'block';
             };
 
